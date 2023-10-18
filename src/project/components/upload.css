@@ -1,0 +1,12 @@
+.ant-upload.ant-upload-drag {
+  width: 800px;
+  height: 420px;
+  border-width: 2px;
+  &:hover {
+    border: 2px dashed #3a86ef;
+    background-color: #eaf2fd;
+  }
+  .ant-upload-drag-container {
+    position: relative;
+  }
+}
