@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon_csv文件2</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="数据上传（已上传）" transform="translate(-334.000000, -624.000000)">
+            <g id="编组-4备份" transform="translate(318.000000, 612.000000)">
+                <g id="图标_csv文件2" transform="translate(16.000000, 12.000000)">
+                    <rect id="矩形" fill-opacity="0" fill="#D8D8D8" x="0" y="0" width="45" height="44"></rect>
+                    <g id="编组-12" transform="translate(7.000000, 4.000000)">
+                        <path d="M18.0028526,0 L31,12.603125 L31,32.8375 C31,35.1363853 29.0782684,37 26.7076923,37 L4.29230769,37 C1.92173161,37 0,35.1363853 0,32.8375 L0,4.1625 C0,1.86361473 1.92173161,0 4.29230769,0 L18.0028526,0 Z" id="路径" fill="#FFEB97"></path>
+                        <path d="M18.421,0.324444444 L31.399,13.0134444 L31.4,13.2311111 L23.96,13.2311111 C20.7788398,13.2311111 18.2,10.6522713 18.2,7.47111111 L18.2,0.324444444 L18.421,0.324444444 Z" id="Combined-Shape" fill="#F2CE66" fill-rule="nonzero"></path>
+                        <text id="CSV" font-family="PingFangSC-Semibold, PingFang SC" font-size="10" font-weight="500" fill="#C69D07">
+                            <tspan x="5" y="30">CSV</tspan>
+                        </text>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
