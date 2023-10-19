@@ -33,7 +33,7 @@ const DemoPage = () => {
     onDrop(e) {
       console.log("Dropped files", e.dataTransfer.files);
     },
-    itemRender(originNode: React.ReactElement, file: UploadFile, fileList: object[], actions: { download:()=>void, preview:()=>void, remove:()=>void }) {
+    itemRender(originNode, file, fileList, actions: { download:()=>void, preview:()=>void, remove:()=>void }) {
       return (
         <DraggableUploadListItem
           originNode={originNode}
@@ -48,18 +48,21 @@ const DemoPage = () => {
     // },
   };
 
-  interface DraggableUploadListItemProps {
-    originNode: React.ReactElement;
-    file: UploadFile;
-    fileList: object[];
+  interface DraggableUploadListItemFunProps {
     download?: () => void;
     preview?: () => void;
     remove?: () => void;
   }
 
+  interface DraggableUploadListItemProps extends DraggableUploadListItemFunProps{
+    originNode?: React.ReactElement;
+    file: UploadFile;
+    fileList?: object[];
+  }
+
   const handelFormat = (percent:number|undefined, successPercent:number|undefined) => {
     console.log(percent,successPercent,'percent,successPercent');
-    return <div/>
+    return <div>111</div>
   }
 
   const statusType = {
