@@ -1,38 +1,61 @@
-import React from "react";
-import "./upload.scss";
-import {
-  FileJpgOutlined,
-  PullRequestOutlined,
-  CloseCircleFilled
-} from "@ant-design/icons";
-import type { UploadProps } from "antd";
+import React, { useState } from "react";
 import { message, Upload, Button, Image, Progress } from "antd";
+import { FileJpgOutlined, PullRequestOutlined, CloseCircleFilled } from "@ant-design/icons";
+import type { UploadProps } from "antd";
 import type { UploadFile } from "antd/es/upload/interface";
 import icon_csv from '../../assets/icon_csv.svg'
 import icon_excel from '../../assets/icon_excel.svg'
 import icon_upload_default from '../../assets/icon_upload_default.svg'
+import "./upload.scss";
+
 const { Dragger } = Upload;
 
 const DemoPage = () => {
+  // 最大文件 2GB
+  const maxFileSize = 1024 * 1024 * 1024 * 2
+  const [socketId, setSocketId] = useState('')
+  
+  /**
+   * @description: 文件切片
+   * @param {UploadFile} file 文件
+   * @param {Number} LENGTH 切割大小
+   * @return {Array[Blob]}
+  */
+  // LENGTH = 1024 * 1024 * 50
+  const fileSlice = (file: UploadFile, LENGTH = 1024): Array<Blob> => {
+    console.log(file,'slice-file');
+    
+    const piece = LENGTH
+    const totalSize = file.size ?? 0
+    let start = 0 // 每次上传的开始字节
+    let end = start + piece
+    const chunks = [] // 切片集合
+
+    // console.log(file.slice(0,20),'Blob-slice');
+
+    while (start < totalSize) {
+      // 根据长度截取每次需要上传的数据
+      // File对象继承自Blob对象，因此包含slice方法
+      const blob = file.slice(start, end)
+
+      console.log(blob,'--blod切片');
+      
+      chunks.push(blob)
+
+      start = end
+      end = start + piece
+    }
+
+    console.log(chunks,'--chunk集合');
+
+    return chunks
+  }
+
   const props: UploadProps = {
     name: "file",
     multiple: true,
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
     accept: '.csv, .xlsx, .png, .tsx',
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== "uploading") {
-        console.log(info.file, info.fileList,'uploading');
-      }
-      if (status === "done") {
-        message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    },
-    onDrop(e) {
-      console.log("Dropped files", e.dataTransfer.files);
-    },
     itemRender(originNode, file, fileList, actions: { download:()=>void, preview:()=>void, remove:()=>void }) {
       return (
         <DraggableUploadListItem
@@ -43,9 +66,50 @@ const DemoPage = () => {
         />
       )
     },
-    // customRequest(info) {
-    //   console.log(info,'su-info');
+    onChange(info) {
+      const { status } = info.file;
+
+      // console.log(info,'onchange-info');
+
+      // console.log(info.file, info.fileList,'uploading');
+      // if (status !== "uploading") {
+      //   message.info('loading');
+      // }
+      if (status === "done") {
+        message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+    // beforeUpload(file, fileList) {
+    //   console.log(file, fileList,'beforeUpload');
+    //   // 文件大小超过2GB，请联系管理员后台上传
+    //   if (file.size! > maxFileSize) {
+    //     message.error('文件大小超过2GB，请联系管理员后台上传')
+    //     return
+    //   }
+
+    //   const chunks = fileSlice(file)
+    //   // AbortController 控制器对象，允许中止一个或多个web请求
+    //   const controller = new AbortController()
+
+    //   // console.log(chunks,'----ch--');
+      
     // },
+    onDrop(e) {
+      console.log(e.dataTransfer.files, "Dropped files");
+    },
+    customRequest(info) {
+      console.log(info, 'customRequest-info');
+      if (info.file.size! > maxFileSize) {
+        message.error('文件大小超过2GB，请联系管理员后台上传111')
+        return
+      }
+
+      const chunks = fileSlice(info.file)
+
+      console.log(chunks,'----ch--');
+    },
   };
 
   interface DraggableUploadListItemFunProps {
@@ -73,7 +137,7 @@ const DemoPage = () => {
   }
   
   const DraggableUploadListItem = ({ originNode, file, fileList, remove }: DraggableUploadListItemProps) => {
-    console.log(originNode, file, fileList, 'file');
+    // console.log(originNode, file, fileList, 'file');
     
     return (
       <div className="w-[800px] h-[68px] px-[16px] flex justify-between items-center">
