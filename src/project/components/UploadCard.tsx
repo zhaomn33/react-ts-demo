@@ -7,6 +7,7 @@ import icon_csv from '../../assets/icon_csv.svg'
 import icon_excel from '../../assets/icon_excel.svg'
 import icon_upload_default from '../../assets/icon_upload_default.svg'
 import "./upload.scss";
+import customSocket from '../data/socket.ts'
 
 const { Dragger } = Upload;
 
@@ -14,6 +15,26 @@ const DemoPage = () => {
   // 最大文件 2GB
   const maxFileSize = 1024 * 1024 * 1024 * 2
   const [socketId, setSocketId] = useState('')
+
+  // 建立socket链接
+  console.log('建立socket链接')
+  const io = new customSocket()
+  console.log(io,'---io');
+  io.openSocket()
+
+  console.log(io.socket,'io.io.socket');
+
+
+  // socket链接成功的回调
+  io.socket.on('connect', (...args: []) => {
+    console.log(io.socket,'io.sooooo');
+    
+  })
+  io.socket.on('connect_error', (error) => {
+    console.log(error,'🔕error');
+    
+  })
+  
   
   /**
    * @description: 文件切片
@@ -55,7 +76,7 @@ const DemoPage = () => {
     name: "file",
     multiple: true,
     action: "https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188",
-    accept: '.csv, .xlsx, .png, .tsx',
+    accept: '.csv, .xlsx, .png, .tsx', // 可上传的文件类型
     itemRender(originNode, file, fileList, actions: { download:()=>void, preview:()=>void, remove:()=>void }) {
       return (
         <DraggableUploadListItem
@@ -81,35 +102,35 @@ const DemoPage = () => {
         message.error(`${info.file.name} file upload failed.`);
       }
     },
-    // beforeUpload(file, fileList) {
-    //   console.log(file, fileList,'beforeUpload');
-    //   // 文件大小超过2GB，请联系管理员后台上传
-    //   if (file.size! > maxFileSize) {
-    //     message.error('文件大小超过2GB，请联系管理员后台上传')
-    //     return
-    //   }
-
-    //   const chunks = fileSlice(file)
-    //   // AbortController 控制器对象，允许中止一个或多个web请求
-    //   const controller = new AbortController()
-
-    //   // console.log(chunks,'----ch--');
-      
-    // },
-    onDrop(e) {
-      console.log(e.dataTransfer.files, "Dropped files");
-    },
-    customRequest(info) {
-      console.log(info, 'customRequest-info');
-      if (info.file.size! > maxFileSize) {
-        message.error('文件大小超过2GB，请联系管理员后台上传111')
+    beforeUpload(file, fileList) {
+      console.log(file, fileList,'beforeUpload');
+      // 文件大小超过2GB，请联系管理员后台上传
+      if (file.size! > maxFileSize) {
+        message.error('文件大小超过2GB，请联系管理员后台上传')
         return
       }
 
-      const chunks = fileSlice(info.file)
+      const chunks = fileSlice(file)
+      // AbortController 控制器对象，允许中止一个或多个web请求
+      const controller = new AbortController()
 
-      console.log(chunks,'----ch--');
+      // console.log(chunks,'----ch--');
+      
     },
+    onDrop(e) {
+      console.log(e.dataTransfer.files, "Dropped files");
+    },
+    // customRequest(info) {
+    //   console.log(info, 'customRequest-info');
+    //   if (info.file.size! > maxFileSize) {
+    //     message.error('文件大小超过2GB，请联系管理员后台上传111')
+    //     return
+    //   }
+
+    //   const chunks = fileSlice(info.file)
+
+    //   console.log(chunks,'----ch--');
+    // },
   };
 
   interface DraggableUploadListItemFunProps {
