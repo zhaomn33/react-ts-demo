@@ -1,9 +1,9 @@
-import React from "react";
-import { Layout, Menu } from "antd";
-import ProjectListPage from "./project";
-import UploadCard from "./project/components/UploadCard";
+import React from 'react'
+import { Layout, Menu } from 'antd'
+import ProjectListPage from './project'
+import UploadCard from './project/components/UploadCard'
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout
 
 const App: React.FC = () => {
   return (
@@ -27,11 +27,11 @@ const App: React.FC = () => {
         {/* <ProjectListPage /> */}
         <UploadCard />
       </Content>
-      <Footer style={{ textAlign: "center" }}>
+      <Footer style={{ textAlign: 'center' }}>
         Ant Design ©2023 Created by Ant UED
       </Footer>
     </Layout>
-  );
-};
+  )
+}
 
-export default App;
+export default App

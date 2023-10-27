@@ -1,42 +1,43 @@
-import React from "react";
-import { Button, Form, Input, Select, Col, Row } from "antd";
-import type { FormInstance } from "antd/es/form";
-const { Option } = Select;
+import React from 'react'
+import { Button, Form, Input, Select, Col, Row } from 'antd'
+import type { FormInstance } from 'antd/es/form'
+const { Option } = Select
 
 const ProjectCreateForm: React.FC = () => {
-  const formRef = React.useRef<FormInstance>(null);
+  const formRef = React.useRef<FormInstance>(null)
 
   const onGenderChange = (value: string) => {
     switch (value) {
-      case "male":
-        formRef.current?.setFieldsValue({ note: "Hi, man!" });
-        break;
-      case "female":
-        formRef.current?.setFieldsValue({ note: "Hi, lady!" });
-        break;
-      case "other":
-        formRef.current?.setFieldsValue({ note: "Hi there!" });
-        break;
+      case 'male':
+        formRef.current?.setFieldsValue({ note: 'Hi, man!' })
+        break
+      case 'female':
+        formRef.current?.setFieldsValue({ note: 'Hi, lady!' })
+        break
+      case 'other':
+        formRef.current?.setFieldsValue({ note: 'Hi there!' })
+        break
       default:
-        break;
+        break
     }
-  };
+  }
 
   const onFinish = (values: any) => {
-    console.log(values);
-  };
+    console.log(values)
+  }
 
   const onReset = () => {
-    formRef.current?.resetFields();
-  };
+    formRef.current?.resetFields()
+  }
 
   const onFill = () => {
-    formRef.current?.setFieldsValue({ note: "Hello world!", gender: "male" });
-  };
+    formRef.current?.setFieldsValue({ note: 'Hello world!',
+      gender: 'male' })
+  }
 
   return (
     <Form
-      layout={"inline"}
+      layout={'inline'}
       ref={formRef}
       name="control-ref"
       onFinish={onFinish}
@@ -70,7 +71,7 @@ const ProjectCreateForm: React.FC = () => {
         }
       >
         {({ getFieldValue }) =>
-          getFieldValue("gender") === "other" ? (
+          getFieldValue('gender') === 'other' ? (
             <Form.Item
               name="customizeGender"
               label="Customize Gender"
@@ -93,7 +94,7 @@ const ProjectCreateForm: React.FC = () => {
         </Button>
       </Form.Item>
     </Form>
-  );
-};
+  )
+}
 
-export default ProjectCreateForm;
+export default ProjectCreateForm
