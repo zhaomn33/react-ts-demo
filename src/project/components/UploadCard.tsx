@@ -55,11 +55,6 @@ const useStyle = createStyles(({ css }) => ({
       &:hover {
         box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.08)
       }
-    },
-    .ant-space {
-      .ant-space-item:nth-of-type(2) {
-        width: 663px
-      }
     }
   }`
 }))
@@ -247,7 +242,7 @@ const DemoPage = () => {
           src={file.name.includes('.csv') ? icon_csv : icon_excel}
           className="w-[44px] h-[44px] border-[1px] border-dashed border-[#aaa]"
         />
-        <div className="w-[663px]">
+        <div className="w-[fill-available] mx-[13px]">
           <div className="flex justify-between">
             <span className="w-full text-[#3A86EF] text-[14px]">{file.name}</span>
             <span>{ file.percent + '%' }</span>
@@ -274,13 +269,16 @@ const DemoPage = () => {
   // 删除某文件
   const handleRemove = async(file: UploadFile) => {
     // TODO: 删除文件的回调
-    const { data } = await axios.delete(`http://10.30.0.16/api/upload/upload?project_id=${ '507f1f77bcf86cd799439011' }`
-      // , {
-      // project_id: '507f1f77bcf86cd799439011',
-      // file_id: file_uid_task.current[file.uid]
-      // }
-    )
-    console.log(data,'delete')
+    // const { data } = await axios.delete(`http://10.30.0.16/api/upload/upload?project_id=${ '507f1f77bcf86cd799439011' }`
+    // , {
+    // project_id: '507f1f77bcf86cd799439011',
+    // file_id: file_uid_task.current[file.uid]
+    // }
+    // )
+    // console.log(data,'delete')
+    const data = {
+      error: 0
+    }
     if (data.error) {
       message.error('删除文件失败')
       return
@@ -334,10 +332,15 @@ const DemoPage = () => {
       console.log(file_uid_task.current,file_uid_task.current[info.file.uid],'file_uid_task.current[info.file.uid]')
       if (status === 'done') {
         // TODO: 切片合并
-        const res = await axios.post('http://10.30.0.16/api/upload/merge', {
-          project_id: '507f1f77bcf86cd799439011',
-          file_id: file_uid_task.current[info.file.uid]
-        })
+        // const res = await axios.post('http://10.30.0.16/api/upload/merge', {
+        //   project_id: '507f1f77bcf86cd799439011',
+        //   file_id: file_uid_task.current[info.file.uid]
+        // })
+        const res = {
+          data: {
+            error: 0
+          }
+        }
         console.log(res, '333333--')
         if (!res.data.error) {
           message.success(`${ info.file.name }文件上传成功`)
@@ -347,7 +350,7 @@ const DemoPage = () => {
       }
     },
     beforeUpload: async(file, fileList) => {
-      console.log('🔥 上传之前', file,fileList)
+      console.log('🔥 上传之前', file, fileList)
       // 获取整体文件的md5
       const _md5 = await getMD5(file as RcFile)
       console.log(_md5, file.name, 'before--')
@@ -377,12 +380,19 @@ const DemoPage = () => {
       console.log(chunks.current, '切片完成chunks 🎁')
 
       // TODO: 需要获取切片ID
-      const { data } = await axios.post('http://10.30.0.16/api/upload/file', {
-        project_id: '507f1f77bcf86cd799439011',
-        file_md5: _md5,
-        file_name: file.name,
-        file_slice_cnt: chunks.current.length
-      })
+      // const { data } = await axios.post('http://10.30.0.16/api/upload/file', {
+      //   project_id: '507f1f77bcf86cd799439011',
+      //   file_md5: _md5,
+      //   file_name: file.name,
+      //   file_slice_cnt: chunks.current.length
+      // })
+      const data = {
+        data: {
+          file_id: 'wr23r234r43'
+        },
+        msg: '成功',
+        error: 0
+      }
       console.log(data,'data')
       if (!data.error) {
         // taskId.current = data.data.file_id
@@ -412,7 +422,13 @@ const DemoPage = () => {
           }, 1000)
         })
         // TODO: 根据后端传回的切片状态进行操作
-        const res = await axios.post('http://10.30.0.16/api/upload/upload', formData)
+        // const res = await axios.post('http://10.30.0.16/api/upload/upload', formData)
+        const res = {
+          data: {
+            msg: '成功',
+            error: 0
+          }
+        }
         console.log(res,'2222222')
 
         if (res.data.error) {
@@ -478,36 +494,38 @@ const DemoPage = () => {
   }
 
   return (
-    <div className="w-[800px]">
-      <Dragger
-        {...props}
-        fileList={isFilelist}
-        className={styles['custom-upload-dragger-container']}
-      >
-        <Button
-          icon={<PullRequestOutlined />}
-          className="absolute right-[16px] top-0 bg-[#fff]"
-          onClick={(e) => {
-            // 阻止默认上传事件
-            e.stopPropagation()
-            console.log('配置数据清洗规则')
-          }}
+    <div className='w-full h-full overflow-auto'>
+      <div className="w-[800px] mx-[auto]">
+        <Dragger
+          {...props}
+          fileList={isFilelist}
+          className={styles['custom-upload-dragger-container']}
         >
+          <Button
+            icon={<PullRequestOutlined />}
+            className="absolute right-[16px] top-0 bg-[#fff]"
+            onClick={(e) => {
+            // 阻止默认上传事件
+              e.stopPropagation()
+              console.log('配置数据清洗规则')
+            }}
+          >
           配置数据清洗规则
-        </Button>
-        <Image
-          className="h-[98px] w-[140px]"
-          src={icon_upload_default}
-          preview={false}
-        />
-        <p className="ant-upload-text !text-[14px]">
-          <a className="text-[#2C72D7] hover:text-[#2C72D7] cursor-pointer">点击</a>
+          </Button>
+          <Image
+            className="h-[98px] w-[140px]"
+            src={icon_upload_default}
+            preview={false}
+          />
+          <p className="ant-upload-text !text-[14px]">
+            <a className="text-[#2C72D7] hover:text-[#2C72D7] cursor-pointer">点击</a>
           或将文件拖至此处上传
-        </p>
-        <p className="ant-upload-hint absolute bottom-0 left-[50%] m-0 translate-x-[-50%] !text-[12px]">
+          </p>
+          <p className="ant-upload-hint absolute bottom-0 left-[50%] m-0 translate-x-[-50%] !text-[12px]">
           支持文件类型：<FileJpgOutlined /> CSV 文件 ｜ <FileJpgOutlined /> Excel 文件
-        </p>
-      </Dragger>
+          </p>
+        </Dragger>
+      </div>
     </div>
   )
 }
