@@ -351,6 +351,7 @@ const DemoPage: React.FC = (props) => {
           // 设置完文件列表后-从需要忽略的列表中删除此文件id，以便下次上传
           const existedFile = info.fileList.findIndex(file => ignoredFiles.current.includes(file.uid))
           existedFile > -1 && ignoredFiles.current.splice(existedFile, 1)
+          // existedFile > -1 && ignoredFiles.current.splice(existedFile, 1)
         } else {
           setIsFilelist([...info.fileList])
         }
@@ -374,21 +375,34 @@ const DemoPage: React.FC = (props) => {
       console.log('🔥 上传之前', file, fileList)
       // 文件大小超过2GB，请联系管理员后台上传
       // if (file.size! > maxFileSize) {
-      //   ignoredFiles.current.push(file.uid)
+      //   !ignoredFiles.current.includes(file.uid) && ignoredFiles.current.push(file.uid)
       //   message.error(`${ file.name }文件大小超过2GB，请联系管理员后台上传`)
       //   return Promise.reject(false)
       // }
+
       // 获取整体文件的md5
       const _md5 = await getMD5(file as RcFile)
       // 判断文件是否已存在
       if (md5List.current.includes(_md5 as string)) {
         // 在忽略列表中添加已经存在的文件id
-        ignoredFiles.current.push(file.uid)
+        !ignoredFiles.current.includes(file.uid) && ignoredFiles.current.push(file.uid)
         messageApi.error(`${ file.name }已经上传过，请勿重复上传`)
         return Promise.reject(false)
       } else {
         md5List.current.push(_md5 as string)
       }
+
+      // 限制一次最多上传文件个数
+      upUidList.current.push(file.uid)
+      if (upUidList.current.length > 2) {
+        !ignoredFiles.current.includes(file.uid) && ignoredFiles.current.push(file.uid)
+        md5List.current.indexOf(_md5 as string) !== -1 &&
+        md5List.current.splice(md5List.current.indexOf(_md5 as string), 1)
+        console.log(ignoredFiles.current,'ignoredFiles.current')
+        messageApi.warning('一次最多可上传1个文件')
+        return
+      }
+
       // 文件切片
       file_uid_chunk.current[file.uid] = fileSlice(file)
       console.log('切片完成chunks 🎁', file_uid_chunk.current[file.uid], '✅')
@@ -408,7 +422,7 @@ const DemoPage: React.FC = (props) => {
         file_uid_taskId.current[file.uid] = data.file_id as string
       } else {
         // 若失败，则添加到需忽略的的文件列表中，且从md5列表删除
-        ignoredFiles.current.push(file.uid)
+        !ignoredFiles.current.includes(file.uid) && ignoredFiles.current.push(file.uid)
         const inMd5List = md5List.current.indexOf(_md5 as string)
         if (inMd5List !== -1) {
           md5List.current.splice(inMd5List, 1)
@@ -420,6 +434,11 @@ const DemoPage: React.FC = (props) => {
       console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀  开始上传', info)
       const upFile = info.file as RcFile
       const controller = new AbortController()
+      // 删除已在上传列表的文件uid
+      if (upUidList.current.includes(upFile.uid)) {
+        upUidList.current.splice(upUidList.current.indexOf(upFile.uid), 1)
+      }
+
       // 一片一片上传
       for (let index = 0; index < file_uid_chunk.current[upFile.uid]?.length; index++) {
         const fileChunk = file_uid_chunk.current[upFile.uid][index]
