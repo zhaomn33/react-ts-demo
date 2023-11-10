@@ -13,6 +13,7 @@ import { useWebSocket,useMap } from 'ahooks'
 import SparkMD5 from 'spark-md5'
 import axios from 'axios'
 import type { UploadRequestOption } from 'rc-upload/lib/interface'
+// import { useRouter } from '../helper/helper-router.ts'
 
 const { Dragger } = Upload
 const useStyle = createStyles(({ css }) => ({
@@ -59,25 +60,40 @@ const useStyle = createStyles(({ css }) => ({
   }`
 }))
 
-const DemoPage = () => {
+const DemoPage: React.FC = (props) => {
   const { styles } = useStyle()
-
+  const [messageApi, messageHolder] = message.useMessage()
+  // const { params } = useRouter()
   // 最大文件 2GB
-  const maxFileSize = 1024 * 1024 * 1024 * 2
-  const [socketId, setSocketId] = useState('')
-  const [isFilelist, setIsFilelist] = useState<Array<UploadFile>>([])
+  // const maxFileSize = 1024 * 1024 * 1024 * 2
+  // const [socketId, setSocketId] = useState('')
+  const [isFilelist, setIsFilelist] = useState<Array<UploadFileInit>>([])
   // 不需要再次添加的文件列表id
   const ignoredFiles = useRef<Array<string>>([])
   // 文件列表中存在的文件md5数组
   const md5List = useRef<Array<string>>([])
-  // 切片数组
-  const chunks = useRef<Array<Blob>>([])
-  // 文件uid和其对应任务序列号
-  interface fileMap {
+  // 删除的文件uid列表
+  const removedList = useRef<Set<string>>(new Set())
+  // 可以上传的uid列表
+  const upUidList = useRef<Array<string>>([])
+  // 文件uid-任务序列号id
+  interface fileMapID {
     [key: string]: string
   }
-  const file_uid_task = useRef<fileMap>({})
-  const io = new customSocket()
+  const file_uid_taskId = useRef<fileMapID>({})
+  // 文件uid-切片集合
+  interface fileMapChunk {
+    [key: string]: Array<Blob>
+  }
+  const file_uid_chunk = useRef<fileMapChunk>({})
+  // 项目ID
+  // const projectID = params.groupProjectId
+  const projectID = 'xxxxxxxx'
+
+  interface UploadFileInit extends UploadFile {
+    file_id?: string
+  }
+  // const io = new customSocket()
 
   // TODO: socket - ahooks
   // const { connect, disconnect } = useWebSocket(io.socketUrl, {
@@ -148,26 +164,24 @@ const DemoPage = () => {
     console.log('init')
     // TODO: 初始化表格状态
     const initFileList = async() => {
-      // const { data } = await axios.get(`http://10.30.0.16/api/upload/upload_list?project_id=${ '507f1f77bcf86cd799439011' }`
-      //   // , {
-      //   // project_id: '507f1f77bcf86cd799439011'
-      //   // }
-      // )
-      // console.log(data,'data-init')
-      // setIsFilelist([{
-      //   'uid': 'rc-upload-1698130959216-3',
-      //   'percent': 70,
-      //   'lastModified': 1698115979439,
-      //   'lastModifiedDate': new Date(),
-      //   'name': '副本list.xlsx',
-      //   'size': 10169,
-      //   'type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      //   'originFileObj': {
-      //     'uid': 'rc-upload-1698130959216-3',
-      //     'percent': null
-      //   },
-      //   'status': 'uploading'
-      // }])
+      const data = {
+        upload_list: [{
+          file_id: 'xxx111',
+          file_name: 'xxxxxx',
+          finish_slices: [0, 1, 2],
+          slice_cnt: 3
+        }]
+      }
+      const error = 0
+      if (!error) {
+        setIsFilelist(data?.upload_list?.map((item: any) => {
+          return {
+            ...item,
+            name: item.file_name,
+            percent: Math.floor((item.finish_slices.length / item.slice_cnt) * 100)
+          }
+        }))
+      }
     }
     initFileList()
   }, [])
@@ -194,7 +208,7 @@ const DemoPage = () => {
    * @param {Number} LENGTH 切割大小
    * @return {Array[Blob]}
   */
-  const fileSlice = (file: UploadFile, LENGTH = 1024): Array<Blob> => {
+  const fileSlice = (file: RcFile, LENGTH = 1024 * 1024): Array<Blob> => {
     // console.log(file,'slice-file 🔪')
     const piece = LENGTH
     const totalSize = file.size ?? 0
@@ -227,14 +241,8 @@ const DemoPage = () => {
     })
   }
 
-  const statusType = {
-    'error': 'exception',
-    'done': 'success',
-    'uploading': 'active',
-    'removed': 'normal'
-  }
   // 上传文件列表样式
-  const DraggableUploadListItem = ({ originNode, file, fileList }: DraggableUploadListItemProps) => {
+  const DraggableUploadListItem = ({ file }: DraggableUploadListItemProps) => {
     // console.log('🍑 生成列表item')
     return (
       <div className="w-[800px] h-[68px] px-[16px] flex justify-between items-center">
@@ -261,13 +269,18 @@ const DemoPage = () => {
             color: '#C4C8D1'
           }}
           className="ml-[16px] cursor-pointer"
-          onClick={() => handleRemove(file)}
+          onClick={() => {
+            if (removedList.current.has(file.uid)) {
+              return
+            }
+            handleRemove(file)
+          }}
         />
       </div>
     )
   }
   // 删除某文件
-  const handleRemove = async(file: UploadFile) => {
+  const handleRemove = async(file: UploadFileInit) => {
     // TODO: 删除文件的回调
     // const { data } = await axios.delete(`http://10.30.0.16/api/upload/upload?project_id=${ '507f1f77bcf86cd799439011' }`
     // , {
@@ -276,24 +289,39 @@ const DemoPage = () => {
     // }
     // )
     // console.log(data,'delete')
-    const data = {
-      error: 0
+    console.log('删除⛰️')
+    const requestData = {
+      project_id: projectID,
+      file_id: file?.file_id ?? file_uid_taskId.current[file.uid as string]
     }
-    if (data.error) {
-      message.error('删除文件失败')
-      return
-    }
-    setIsFilelist(isFilelist.filter(item => item.uid !== file.uid))
-    delete file_uid_task.current[file.uid]
-    console.log(file_uid_task.current,'dd-file_uid_task.current')
-    // 从md5列表中删除当前文件
-    const _md5 = await getMD5(file.originFileObj as RcFile)
-    if (md5List.current.indexOf(_md5 as string) !== -1) {
-      md5List.current.splice(md5List.current.indexOf(_md5 as string), 1)
+    // 获取整体文件的md5
+    // TODO: 删除文件的回调
+    // const { error } = await getFilterResponse(
+    //   await SharedApi.cancerUpload(requestData)
+    // )
+    const error = 0
+    if (!error) {
+      removedList.current.add(file.uid)
+      messageApi.success('取消成功')
+      if (!file?.file_id) {
+        const _md5 = await getMD5(file.originFileObj as RcFile) as string
+        const inMd5List = md5List.current.indexOf(_md5 as string)
+        if (inMd5List !== -1) {
+          md5List.current.splice(inMd5List, 1)
+        }
+      }
+      setIsFilelist(isFilelist.filter(fitem => (file?.file_id ? (file?.file_id !== fitem?.file_id) : (file.uid !== fitem.uid))).map((item: any) => {
+        return {
+          ...item,
+          name: item.name ?? item.file_name,
+          percent: item.percent ?? Math.floor((item.finish_slices?.length / item.slice_cnt) * 100)
+        }
+      }))
+      file.uid && delete file_uid_taskId.current[file.uid] && delete file_uid_chunk.current[file.uid]
     }
   }
   // 文件上传钩子等
-  const props: UploadProps = {
+  const uploadProps: UploadProps = {
     name: 'file',
     multiple: true,
     // action: 'https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188',
@@ -309,187 +337,161 @@ const DemoPage = () => {
       )
     },
     onChange: async(info) => {
-      console.log('上传列表改变 🌹', isFilelist,'filelist', info.fileList)
+      // console.log('上传列表改变 🌹', isFilelist,'filelist', info.fileList)
       const { status } = info.file
-      console.log(status,'staus', info.file)
+      // console.log(status,'staus')
       // 增加判断逻辑-防止在阻止上传后仍然改变fileList，导致渲染上传列表
       if (!status) {
         return
       } else {
-        console.log(ignoredFiles.current,'ignoredFiles.current')
         // 文件列表改变后 state fileList
         if (ignoredFiles.current.length > 0) {
-        // 过滤出已经上传过的文件
+          // 过滤出已经上传过的文件
           setIsFilelist([...info.fileList.filter(file => !ignoredFiles.current.includes(file.uid))])
           // 设置完文件列表后-从需要忽略的列表中删除此文件id，以便下次上传
           const existedFile = info.fileList.findIndex(file => ignoredFiles.current.includes(file.uid))
           existedFile > -1 && ignoredFiles.current.splice(existedFile, 1)
         } else {
           setIsFilelist([...info.fileList])
-          console.log('set⬆️')
         }
       }
-      console.log(file_uid_task.current,file_uid_task.current[info.file.uid],'file_uid_task.current[info.file.uid]')
-      if (status === 'done') {
+      if (status === 'done' && info.file.percent === 100) {
         // TODO: 切片合并
-        // const res = await axios.post('http://10.30.0.16/api/upload/merge', {
-        //   project_id: '507f1f77bcf86cd799439011',
-        //   file_id: file_uid_task.current[info.file.uid]
-        // })
-        const res = {
-          data: {
-            error: 0
-          }
+        const requestData = {
+          project_id: projectID,
+          file_id: file_uid_taskId.current[info.file.uid as string]
         }
-        console.log(res, '333333--')
-        if (!res.data.error) {
-          message.success(`${ info.file.name }文件上传成功`)
+        // const { error } = await SharedApi.mergeChunks(requestData)
+        const error = 0
+        if (!error) {
+          messageApi.success(`${ info.file.name }文件上传成功`)
         } else {
-          message.error(`${ info.file.name }文件合并失败`)
+          messageApi.error(`${ info.file.name }文件合并失败`)
         }
       }
     },
     beforeUpload: async(file, fileList) => {
       console.log('🔥 上传之前', file, fileList)
-      // 获取整体文件的md5
-      const _md5 = await getMD5(file as RcFile)
-      console.log(_md5, file.name, 'before--')
-
       // 文件大小超过2GB，请联系管理员后台上传
       // if (file.size! > maxFileSize) {
       //   ignoredFiles.current.push(file.uid)
       //   message.error(`${ file.name }文件大小超过2GB，请联系管理员后台上传`)
       //   return Promise.reject(false)
       // }
-
+      // 获取整体文件的md5
+      const _md5 = await getMD5(file as RcFile)
       // 判断文件是否已存在
-      // if (md5List.current.includes(_md5 as string)) {
-      //   // 在忽略列表中添加已经存在的文件id
-      //   ignoredFiles.current.push(file.uid)
-      //   message.error(`${ file.name }已经上传过，请勿重复上传`)
-      //   console.log(`${ file.name }已经上传过，请勿重复上传`)
-
-      //   return Promise.reject(false)
-      // } else {
-      //   md5List.current.push(_md5 as string)
-      // }
-
+      if (md5List.current.includes(_md5 as string)) {
+        // 在忽略列表中添加已经存在的文件id
+        ignoredFiles.current.push(file.uid)
+        messageApi.error(`${ file.name }已经上传过，请勿重复上传`)
+        return Promise.reject(false)
+      } else {
+        md5List.current.push(_md5 as string)
+      }
       // 文件切片
-      chunks.current = fileSlice(file)
-      // console.log('切片完成 ✅', chunks.current)
-      console.log(chunks.current, '切片完成chunks 🎁')
+      file_uid_chunk.current[file.uid] = fileSlice(file)
+      console.log('切片完成chunks 🎁', file_uid_chunk.current[file.uid], '✅')
 
       // TODO: 需要获取切片ID
-      // const { data } = await axios.post('http://10.30.0.16/api/upload/file', {
-      //   project_id: '507f1f77bcf86cd799439011',
-      //   file_md5: _md5,
-      //   file_name: file.name,
-      //   file_slice_cnt: chunks.current.length
-      // })
-      const data = {
-        data: {
-          file_id: 'wr23r234r43'
-        },
-        msg: '成功',
-        error: 0
+      const requestData = {
+        project_id: projectID,
+        file_md5: _md5,
+        file_name: file.name,
+        file_slice_cnt: file_uid_chunk.current[file.uid].length
       }
-      console.log(data,'data')
-      if (!data.error) {
-        // taskId.current = data.data.file_id
-        file_uid_task.current[file.uid] = data.data.file_id
-        console.log(111111111, file_uid_task.current)
+      const error = 0
+      const data = {
+        file_id: 'xxx'
+      }
+      if (!error) {
+        file_uid_taskId.current[file.uid] = data.file_id as string
       } else {
-        console.log('失败',data)
-        message.error(data.msg)
-        return Promise.reject(data)
+        // 若失败，则添加到需忽略的的文件列表中，且从md5列表删除
+        ignoredFiles.current.push(file.uid)
+        const inMd5List = md5List.current.indexOf(_md5 as string)
+        if (inMd5List !== -1) {
+          md5List.current.splice(inMd5List, 1)
+        }
+        return Promise.reject(error)
       }
     },
     customRequest: async(info: UploadRequestOption) => {
       console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀  开始上传', info)
-      for (let index = 0; index < chunks.current.length; index++) {
-        const fileChunk = chunks.current[index]
+      const upFile = info.file as RcFile
+      const controller = new AbortController()
+      // 一片一片上传
+      for (let index = 0; index < file_uid_chunk.current[upFile.uid]?.length; index++) {
+        const fileChunk = file_uid_chunk.current[upFile.uid][index]
         const formData = new FormData()
-        formData.append('project_id', '507f1f77bcf86cd799439011')
-        formData.append('file_id', file_uid_task.current[(info.file as RcFile).uid])
+        formData.append('project_id', projectID)
+        formData.append('file_id', file_uid_taskId.current[upFile.uid])
         formData.append('file', fileChunk)
         formData.append('number', index + '')
 
-        console.log(formData,'formData')
-
-        await new Promise(resolve => {
-          setTimeout(() => {
-            resolve(null)
-          }, 1000)
-        })
         // TODO: 根据后端传回的切片状态进行操作
-        // const res = await axios.post('http://10.30.0.16/api/upload/upload', formData)
-        const res = {
-          data: {
-            msg: '成功',
-            error: 0
-          }
-        }
-        console.log(res,'2222222')
-
-        if (res.data.error) {
+        // const { error } = await getFilterResponse(
+        //   await SharedApi.uploadChunks(formData)
+        // )
+        const error = 0
+        if (error) {
           // 当一个文件的切片有一片失败的时候取消所有的请求
-          message.error(res.data.msg)
+          controller.abort()
           break
         } else {
           // 进度条
-          const curPercent = Math.floor((100 / chunks.current.length) * (index + 1))
-
+          let curPercent = Math.floor((100 / file_uid_chunk.current[upFile.uid].length) * (index + 1))
           // console.log(curPercent, 'cur 🍳', index)
+          // 上传成功后-修改进度条状态
           info.onProgress!({ percent: curPercent })
-          // setIsFilelist(isFilelist => isFilelist.map(file => file.uid))
-          if (curPercent >= 100) {
+          if (file_uid_chunk.current[upFile.uid].length === index + 1) {
+            curPercent = 100
             info.onSuccess!({})
           }
         }
-
-        // TODO: 将切片内容传入  all - 链式 全部完成后才进行后面
-        // Promise.all(
-        //   chunks.current.map(async(file, index) => {
-        //     // console.log(file, 'promise-file');
-        //     const formData = new FormData()
-        //     formData.append('project_id', taskId.current)
-        //     formData.append('file_id', taskId.current)
-        //     formData.append('file', file)
-        //     formData.append('number', index + '')
-
-        //     // TODO: 根据后端传回的切片状态进行操作
-        //     const res = {
-        //       error: 0,
-        //       data: formData
-        //     }
-
-        //     if (res.error) {
-        //       // 当一个文件的切片有一片失败的时候取消所有的请求
-        //       controller.abort()
-        //       return Promise.reject(res)
-        //     } else {
-        //       const curPercent = Math.floor((100 / chunks.current.length) * (index + 1))
-        //       // 进度条
-        //       // console.log(curPercent, 'cur 🍳')
-        //       info.onProgress({ percent: Math.floor((100 / chunks.current.length) * (index + 1)) })
-
-        //       // 上传成功后-修改进度条状态
-        //       return Promise.resolve(res)
-        //     }
-        //   })
-        // ).then(async(values: any) => {
-        //   // 所有请求返回结束
-        //   console.log('values-所有请求返回结束 😯 ✅')
-        //   info.onSuccess('成功')
-
-        //   // console.log(info.file,'--info.file',info.file.percent);
-        //   // TODO: 切片合并
-
-        // }).catch((error: any) => {
-        //   console.log(error, '有错误状态更新')
-        //   // 失败的时候应该清0，报错
-        // })
       }
+      // TODO: 将切片内容传入  all - 链式 全部完成后才进行后面
+      // Promise.all(
+      //   chunks.current.map(async(file, index) => {
+      //     // console.log(file, 'promise-file');
+      //     const formData = new FormData()
+      //     formData.append('project_id', taskId.current)
+      //     formData.append('file_id', taskId.current)
+      //     formData.append('file', file)
+      //     formData.append('number', index + '')
+
+      //     // TODO: 根据后端传回的切片状态进行操作
+      //     const res = {
+      //       error: 0,
+      //       data: formData
+      //     }
+
+      //     if (res.error) {
+      //       // 当一个文件的切片有一片失败的时候取消所有的请求
+      //       controller.abort()
+      //       return Promise.reject(res)
+      //     } else {
+      //       const curPercent = Math.floor((100 / chunks.current.length) * (index + 1))
+      //       // 进度条
+      //       // console.log(curPercent, 'cur 🍳')
+      //       info.onProgress({ percent: Math.floor((100 / chunks.current.length) * (index + 1)) })
+
+      //       // 上传成功后-修改进度条状态
+      //       return Promise.resolve(res)
+      //     }
+      //   })
+      // ).then(async(values: any) => {
+      //   // 所有请求返回结束
+      //   console.log('values-所有请求返回结束 😯 ✅')
+      //   info.onSuccess('成功')
+
+      //   // console.log(info.file,'--info.file',info.file.percent);
+      //   // TODO: 切片合并
+
+      // }).catch((error: any) => {
+      //   console.log(error, '有错误状态更新')
+      //   // 失败的时候应该清0，报错
+      // })
     }
   }
 
@@ -497,7 +499,7 @@ const DemoPage = () => {
     <div className='w-full h-full overflow-auto'>
       <div className="w-[800px] mx-[auto]">
         <Dragger
-          {...props}
+          {...uploadProps}
           fileList={isFilelist}
           className={styles['custom-upload-dragger-container']}
         >
@@ -524,6 +526,7 @@ const DemoPage = () => {
           <p className="ant-upload-hint absolute bottom-0 left-[50%] m-0 translate-x-[-50%] !text-[12px]">
           支持文件类型：<FileJpgOutlined /> CSV 文件 ｜ <FileJpgOutlined /> Excel 文件
           </p>
+          {messageHolder}
         </Dragger>
       </div>
     </div>
