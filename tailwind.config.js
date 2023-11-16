@@ -12,7 +12,8 @@ export default {
     }
   },
   corePlugins: {
-    // preflight: false,
+    // 防止样式被tailwind覆盖
+    preflight: false
   },
   plugins: []
 }

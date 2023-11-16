@@ -35,6 +35,9 @@ dependencies:
   react-router:
     specifier: ^6.18.0
     version: 6.18.0(react@18.2.0)
+  react-router-dom:
+    specifier: ^6.18.0
+    version: 6.18.0(react-dom@18.2.0)(react@18.2.0)
   spark-md5:
     specifier: ^3.0.2
     version: 3.0.2
@@ -3034,6 +3037,19 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+    dev: false
+
+  /react-router-dom@6.18.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Ubrue4+Ercc/BoDkFQfc6og5zRQ4A8YxSO3Knsne+eRbZ+IepAsK249XBH/XaFuOYOYr3L3r13CXTLvYt5JDjw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.11.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-router: 6.18.0(react@18.2.0)
     dev: false
 
   /react-router@6.18.0(react@18.2.0):

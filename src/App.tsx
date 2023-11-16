@@ -1,35 +1,70 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Layout, Menu } from 'antd'
+import {
+  AppstoreOutlined,
+  DesktopOutlined,
+  MailOutlined
+} from '@ant-design/icons'
+import type { MenuProps } from 'antd'
 import ProjectListPage from './project'
 import UploadCard from './project/components/UploadCard'
+import CreateModal from './project/components/CreateModal'
+import SideAreaLayout from './project/components/SideAreaLayout'
 
-const { Header, Content, Footer } = Layout
+const { Content, Sider } = Layout
+
+type MenuItem = Required<MenuProps>['items'][number]
+
+function getItem(
+  label: React.ReactNode,
+  key: React.Key,
+  icon?: React.ReactNode,
+  children?: MenuItem[],
+  type?: 'group'
+): MenuItem {
+  return {
+    key,
+    icon,
+    children,
+    label,
+    type
+  } as MenuItem
+}
+
+const items: MenuItem[] = [
+  getItem('文件上传', 'upload', <MailOutlined />),
+  getItem('表格', 'table', <AppstoreOutlined />),
+  getItem('弹框', 'modal', <DesktopOutlined />),
+  getItem('侧边栏Layout', 'layout', <AppstoreOutlined />)
+]
+
+const route:{ [key:string] :any; } = {
+  'upload': <UploadCard />,
+  'table': <ProjectListPage />,
+  'modal': <CreateModal/>,
+  'layout': <SideAreaLayout/>
+}
 
 const App: React.FC = () => {
+  const [current, setCurrent] = useState('layout')
   return (
     <Layout className="h-screen w-screen">
-      {/* <Header style={{ display: "flex", alignItems: "center" }}>
-        <div className="demo-logo" />
+      <Sider>
         <Menu
-          theme="dark"
-          mode="horizontal"
-          defaultSelectedKeys={["2"]}
-          items={new Array(15).fill(null).map((_, index) => {
-            const key = index + 1;
-            return {
-              key,
-              label: `nav ${key}`,
-            };
-          })}
+          className='w-[200px] h-full'
+          defaultSelectedKeys={['modal']}
+          mode="inline"
+          items={items}
+          selectedKeys={[current]}
+          onClick={(e) => setCurrent(e.key)}
         />
-      </Header> */}
+      </Sider>
       <Content className="bg-bg-main p-10">
-        {/* <ProjectListPage /> */}
-        <UploadCard />
+        {route[current]}
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
+      {/* <Footer style={{ textAlign: 'center' }}>
         Ant Design ©2023 Created by Ant UED
-      </Footer>
+      </Footer> */}
     </Layout>
   )
 }
