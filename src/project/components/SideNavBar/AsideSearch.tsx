@@ -32,9 +32,9 @@ const AsideSearch: React.FC<SearchProps> = ({
 
   return (
     <>
-      <div className="px-[16px] py-[12px] flex">
+      <div className="h-[60px] px-[16px] py-[12px] flex border-0 border-b border-solid border-split !mb-[12px]">
         <Input
-          className='w-full h-[36px]'
+          className={addbtn ? 'w-fit h-[36px]' : 'w-full h-[36px]'}
           prefix={<SearchOutlined />}
           placeholder="请输入关键字"
           onChange={(e) => {
@@ -42,7 +42,7 @@ const AsideSearch: React.FC<SearchProps> = ({
           }}
         />
         {
-          // 若传入自定义右侧内容，则不显示此按钮
+          // 若传入自定义右侧内容，则显示自定义内容
           !restProps.searchRight ?
             <Button
               className={addbtn ? 'w-[88px] h-[36px] ml-[8px]' : 'hidden'}
@@ -55,7 +55,6 @@ const AsideSearch: React.FC<SearchProps> = ({
             : restProps.searchRight
         }
       </div>
-      <Divider className="mt-0 !mb-[12px]" />
     </>
   )
 }
