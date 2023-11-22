@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Select, Form, Modal, Divider } from 'antd'
 import { CloseOutlined, EditOutlined } from '@ant-design/icons'
 import { createStyles, cx } from 'antd-style'
@@ -20,50 +20,17 @@ const useStyle = createStyles(({ css }) => ({
     .ant-input-suffix{
       display: none;
     }
+    .ant-input-number-group-wrapper{
+      width: 100%;
+    }
   `,
   'custom-add-member-modal-style': css`
-      .ant-modal-confirm-paragraph{
+    .ant-modal-confirm-paragraph{
       row-gap: 0;
       max-width: 100%;
     }
   `
 }))
-
-const defaultData = [
-  {
-    id: (Date.now() + 1).toString(),
-    originField: 'OrderID',
-    newField: '订单ID',
-    fieldType: 'string',
-    showType: 2,
-    fieldDec: 'test',
-    explain: ''
-  }, {
-    id: (Date.now() + 2).toString(),
-    originField: 'OrderID',
-    newField: '订单ID',
-    fieldType: 'number',
-    showType: '百万数',
-    fieldDec: 'test',
-    explain: ''
-  }, {
-    id: (Date.now() + 3).toString(),
-    originField: 'OrderID',
-    newField: '订单ID',
-    fieldType: 'boolean',
-    showType: true,
-    fieldDec: 'test',
-    explain: ''
-  }, {
-    id: (Date.now() + 4).toString(),
-    originField: 'OrderID',
-    newField: '订单ID',
-    fieldType: 'time',
-    showType: 'YYYY-MM',
-    fieldDec: 'test',
-    explain: ''
-  }
-]
 
 type DataSourceType = {
   id: string
@@ -79,15 +46,72 @@ type CellType = 'number' | 'string' | 'time' | 'boolean'
 
 const FieldConfig: React.FC = () => {
   const { styles } = useStyle()
-  const [tableData, setTableData] = useState(defaultData)
+  const [tableData, setTableData] = useState<Array<DataSourceType>>()
   const [editStatus, setEditStatus] = useState<any>(true)
-  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() =>
-    defaultData.map(item => item.id)
-  )
+  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>()
   const [modal, contextHolder] = Modal.useModal()
 
-  const getData = (val:any) => {
-    console.log(val,'val')
+  const getTableData = useCallback(() => {
+    setTimeout(() => {
+      const defaultData:DataSourceType[] = [
+        {
+          id: (Date.now() + 1).toString(),
+          originField: 'OrderID',
+          newField: '订单ID',
+          fieldType: 'string',
+          showType: 2,
+          fieldDec: 'test',
+          explain: ''
+        }, {
+          id: (Date.now() + 2).toString(),
+          originField: 'OrderID',
+          newField: '订单ID',
+          fieldType: 'number',
+          showType: '百万数',
+          fieldDec: 'test',
+          explain: ''
+        }, {
+          id: (Date.now() + 3).toString(),
+          originField: 'OrderID',
+          newField: '订单ID',
+          fieldType: 'boolean',
+          showType: true,
+          fieldDec: 'test',
+          explain: ''
+        }, {
+          id: (Date.now() + 4).toString(),
+          originField: 'OrderID',
+          newField: '订单ID',
+          fieldType: 'time',
+          showType: 'YYYY-MM',
+          fieldDec: 'test',
+          explain: ''
+        }
+      ]
+      setTableData(defaultData)
+      setEditableRowKeys(() => defaultData.map(item => item.id))
+    },200)
+  },[])
+
+  useEffect(() => {
+    getTableData()
+  }, [getTableData])
+
+  const getShowType = (val:any, rowID: string) => {
+    console.log(val, 'val', rowID, 'rowID')
+    // TODO: 获取弹框数据后，修改表格内数据
+    const newData = tableData?.map((row:DataSourceType) => {
+      if (row.id === rowID) {
+        return {
+          ...row,
+          showType: val.scale
+        }
+      } else {
+        return row
+      }
+    })
+    console.log(newData,'newData-')
+    setTableData(newData)
   }
   const handelFormat = (row:any) => {
     console.log(row, 'row')
@@ -107,7 +131,12 @@ const FieldConfig: React.FC = () => {
       style: { padding: 0 },
       icon: null,
       footer: null,
-      content: <FormatDialog defaultSelect={row.showType} destroy={() => destroy()} getData={(val:any) => getData(val)} />
+      content: <FormatDialog
+        defaultSelect={row.showType}
+        destroy={() => destroy()}
+        getShowType={(val: any, rowID: string) => getShowType(val, rowID)}
+        row={row}
+      />
     })
   }
 
@@ -134,6 +163,24 @@ const FieldConfig: React.FC = () => {
     }
   }
 
+  const fieldOptions = [
+    {
+      value: 'number',
+      label: '数值'
+    },
+    {
+      value: 'string',
+      label: '字符串'
+    },
+    {
+      value: 'boolean',
+      label: '布尔值'
+    },
+    {
+      value: 'time',
+      label: '时间'
+    }
+  ]
   const columns: ProColumns<DataSourceType>[] = [
     {
       title: '原字段名',
@@ -152,24 +199,7 @@ const FieldConfig: React.FC = () => {
       dataIndex: 'fieldType',
       width: '15%',
       valueType: 'select',
-      request: async() => [
-        {
-          value: 'number',
-          label: '数值'
-        },
-        {
-          value: 'string',
-          label: '字符串'
-        },
-        {
-          value: 'boolean',
-          label: '布尔值'
-        },
-        {
-          value: 'time',
-          label: '时间'
-        }
-      ],
+      request: async() => fieldOptions,
       readonly: !editStatus
     },
     {
@@ -202,14 +232,21 @@ const FieldConfig: React.FC = () => {
           type="primary"
           key="save"
           className="h-[36px]"
-          onClick={() => setEditStatus(false)}
+          onClick={() => {
+            console.log(tableData, 'tabledata')
+            // TODO: 走保存数据的接口
+            setEditStatus(false)
+          }}
         >
           保存
         </Button>
         <Button
           type="default"
           className='h-[36px] ml-[16px]'
-          onClick={() => setEditStatus(false)}
+          onClick={async() => {
+            await getTableData()
+            setEditStatus(false)
+          }}
         >
           取消
         </Button>
@@ -238,13 +275,15 @@ const FieldConfig: React.FC = () => {
         toolBarRender={showBtn}
         columns={columns}
         value={tableData}
+        controlled
         editable={{
           type: 'multiple',
           editableKeys,
+          onChange: setEditableRowKeys,
           onValuesChange: (record, recordList) => {
+            console.log(recordList,'recordList')
             setTableData(recordList)
-          },
-          onChange: setEditableRowKeys
+          }
         }}
       />
       {contextHolder}

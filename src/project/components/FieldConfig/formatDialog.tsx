@@ -14,8 +14,9 @@ const useStyle = createStyles(({ css }) => ({
 interface Props {
   defaultSelect: string
   decimalValue?: number
+  row?: any
   destroy: ()=>void
-  getData: (val:any)=>void
+  getShowType: (val:any, rowID: string)=>void
 }
 const FormatDialog: React.FC<Props> = (props) => {
   const { styles } = useStyle()
@@ -33,12 +34,11 @@ const FormatDialog: React.FC<Props> = (props) => {
       value: '百万数'
     }
   ]
-  const onFinish = (values: any) => {
-    console.log('Received values of form: ', values)
-    props.getData(values)
+  const onFinish = (values: any, row: any) => {
+    console.log('Received values of form: ', values, 'row',row)
+    props.getShowType(values, row.id)
     props.destroy()
   }
-
   return (
     <div className='px-[24px] py-[16px]'>
       <Form
@@ -48,7 +48,7 @@ const FormatDialog: React.FC<Props> = (props) => {
           scale: props.defaultSelect,
           decimal: props.decimalValue ?? 0
         }}
-        onFinish={onFinish}
+        onFinish={(val:any) => onFinish(val, props.row)}
       >
         <Form.Item label="比例" name="scale">
           <Select options={scaleOptions} />
