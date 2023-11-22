@@ -15,6 +15,7 @@ interface Props {
   defaultSelect: string
   decimalValue?: number
   destroy: ()=>void
+  getData: (val:any)=>void
 }
 const FormatDialog: React.FC<Props> = (props) => {
   const { styles } = useStyle()
@@ -34,6 +35,7 @@ const FormatDialog: React.FC<Props> = (props) => {
   ]
   const onFinish = (values: any) => {
     console.log('Received values of form: ', values)
+    props.getData(values)
     props.destroy()
   }
 

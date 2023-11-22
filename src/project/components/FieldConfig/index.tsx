@@ -86,6 +86,9 @@ const FieldConfig: React.FC = () => {
   )
   const [modal, contextHolder] = Modal.useModal()
 
+  const getData = (val:any) => {
+    console.log(val,'val')
+  }
   const handelFormat = (row:any) => {
     console.log(row, 'row')
     const { destroy } = modal.confirm({
@@ -104,7 +107,7 @@ const FieldConfig: React.FC = () => {
       style: { padding: 0 },
       icon: null,
       footer: null,
-      content: <FormatDialog defaultSelect={row.showType} destroy={() => destroy()} />
+      content: <FormatDialog defaultSelect={row.showType} destroy={() => destroy()} getData={(val:any) => getData(val)} />
     })
   }
 
