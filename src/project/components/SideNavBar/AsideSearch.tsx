@@ -32,11 +32,12 @@ const AsideSearch: React.FC<SearchProps> = ({
 
   return (
     <>
-      <div className="h-[60px] px-[16px] py-[12px] flex border-0 border-b border-solid border-split !mb-[12px]">
+      <div className="h-[60px] px-[16px] py-[12px] flex border-0 border-b border-solid border-[#DEE2EA] !mb-[12px]">
         <Input
           className={addbtn ? 'w-fit h-[36px]' : 'w-full h-[36px]'}
           prefix={<SearchOutlined />}
           placeholder="请输入关键字"
+          allowClear
           onChange={(e) => {
             runSearch(e.target.value)
           }}

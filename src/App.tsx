@@ -10,6 +10,7 @@ import ProjectListPage from './project'
 import UploadCard from './project/components/UploadCard'
 import CreateModal from './project/components/CreateModal'
 import SideAreaLayout from './project/components/SideAreaLayout'
+import FieldConfig from './project/components/FieldConfig'
 
 const { Content, Sider } = Layout
 
@@ -35,24 +36,26 @@ const items: MenuItem[] = [
   getItem('文件上传', 'upload', <MailOutlined />),
   getItem('表格', 'table', <AppstoreOutlined />),
   getItem('弹框', 'modal', <DesktopOutlined />),
-  getItem('侧边栏Layout', 'layout', <AppstoreOutlined />)
+  getItem('侧边栏Layout', 'layout', <AppstoreOutlined />),
+  getItem('可编辑表格', 'editTable', <MailOutlined />)
 ]
 
 const route:{ [key:string] :any; } = {
   'upload': <UploadCard />,
   'table': <ProjectListPage />,
-  'modal': <CreateModal/>,
-  'layout': <SideAreaLayout/>
+  'modal': <CreateModal />,
+  'layout': <SideAreaLayout />,
+  'editTable': <FieldConfig />
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('layout')
+  const [current, setCurrent] = useState('editTable')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
         <Menu
           className='w-[200px] h-full'
-          defaultSelectedKeys={['modal']}
+          defaultSelectedKeys={['upload']}
           mode="inline"
           items={items}
           selectedKeys={[current]}
