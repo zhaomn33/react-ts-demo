@@ -12,31 +12,31 @@ const useStyle = createStyles(({ css }) => ({
 }))
 
 interface Props {
-  defaultSelect: string
-  decimalValue?: number
-  row?: any
+  defaultFormat: string
+  defaultDigits?: number
+  rowID?: any
   destroy: ()=>void
-  getShowType: (val:any, rowID: string)=>void
+  getDisplayValue: (val:any, rowID: string)=>void
 }
 const FormatDialog: React.FC<Props> = (props) => {
   const { styles } = useStyle()
   const scaleOptions = [
     {
-      label: '千数',
-      value: '千数'
+      label: '千',
+      value: '千'
     },
     {
-      label: '万数',
-      value: '万数'
+      label: '万',
+      value: '万'
     },
     {
-      label: '百万数',
-      value: '百万数'
+      label: '百分比',
+      value: '百分比'
     }
   ]
-  const onFinish = (values: any, row: any) => {
-    console.log('Received values of form: ', values, 'row',row)
-    props.getShowType(values, row.id)
+  const onFinish = (values: any, rowID: string) => {
+    console.log('Received values of form: ', values)
+    props.getDisplayValue(values, rowID)
     props.destroy()
   }
   return (
@@ -45,10 +45,10 @@ const FormatDialog: React.FC<Props> = (props) => {
         labelCol={{ span: 5 }}
         className={styles['custom-form-style']}
         initialValues={{
-          scale: props.defaultSelect,
-          decimal: props.decimalValue ?? 0
+          scale: props.defaultFormat,
+          decimal: props.defaultDigits
         }}
-        onFinish={(val:any) => onFinish(val, props.row)}
+        onFinish={(val:any) => onFinish(val, props.rowID)}
       >
         <Form.Item label="比例" name="scale">
           <Select options={scaleOptions} />

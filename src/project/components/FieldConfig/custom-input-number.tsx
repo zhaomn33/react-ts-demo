@@ -13,6 +13,11 @@ interface custIptType {
 }
 
 const useStyle = createStyles({
+  'custom-iptnumber-box': {
+    '.ant-input-number-group-addon': {
+      padding: 0
+    }
+  },
   'custom-iptnumber-container': {
     '.ant-input-number-group-addon': {
       '&:first-child': {
@@ -43,6 +48,7 @@ const useStyle = createStyles({
 const CustomInputNumber: React.FC<custIptType> = props => {
   const { styles } = useStyle()
   const [disabledStyle, setDisabledStyle] = useState(false)
+  const curHeight = ((props.height ? props.height : 36) - 2) + 'px'
   // 阈值大小change事件
   const handleReduceNum = (type = 'reduce') => {
     const currentValue = props.value || 0
@@ -84,31 +90,40 @@ const CustomInputNumber: React.FC<custIptType> = props => {
             precision={props.precision || 0}
             placeholder="请输入"
             className={cx({
+              [styles['custom-iptnumber-box']]: true,
               [styles['custom-iptnumber-container']]: disabledStyle
             })}
             addonBefore={
-              <span
-                className={cx({
-                  'cursor-pointer': true,
-                  [styles['custom-disabled-pre']]: disabledStyle
-                })}
+              <div
+                className={cx(
+                  { [styles['custom-disabled-pre']]: disabledStyle },
+                  'w-[28px] cursor-pointer select-none'
+                )}
                 onClick={() => handleReduceNum()}
+                style={{
+                  height: curHeight,
+                  lineHeight: curHeight
+                }}
               >
                 -
-              </span>
+              </div>
             }
             addonAfter={
-              <span
-                className="cursor-pointer"
+              <div
+                className="w-[28px] cursor-pointer select-none"
+                style={{
+                  height: curHeight,
+                  lineHeight: curHeight
+                }}
                 onClick={() => handleReduceNum('add')}
               >
                 +
-              </span>
+              </div>
             }
           />
           <span
             className={cx({
-              'label-margin-left': props.label
+              [styles['label-margin-left']]: props.label
             })}
           >
             {props.label}

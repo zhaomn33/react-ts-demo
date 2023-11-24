@@ -23,6 +23,9 @@ const useStyle = createStyles(({ css }) => ({
     .ant-input-number-group-wrapper{
       width: 100%;
     }
+    .ant-form-item-margin-offset{
+      display: none;
+    }
   `,
   'custom-add-member-modal-style': css`
     .ant-modal-confirm-paragraph{
@@ -37,12 +40,13 @@ type DataSourceType = {
   originField: string
   newField: string
   fieldType: string
-  showType: any
+  displayFormat: any
+  displayDigits: number
   fieldDec: string
   explain: string
 }
 
-type CellType = 'number' | 'string' | 'time' | 'boolean'
+type CellType = 'Float32' | 'String' | 'UInt8' | 'Datetime'
 
 const FieldConfig: React.FC = () => {
   const { styles } = useStyle()
@@ -58,32 +62,36 @@ const FieldConfig: React.FC = () => {
           id: (Date.now() + 1).toString(),
           originField: 'OrderID',
           newField: '订单ID',
-          fieldType: 'string',
-          showType: 2,
+          fieldType: 'Float32',
+          displayFormat: '百万数',
+          displayDigits: 2,
           fieldDec: 'test',
           explain: ''
         }, {
           id: (Date.now() + 2).toString(),
           originField: 'OrderID',
           newField: '订单ID',
-          fieldType: 'number',
-          showType: '百万数',
+          fieldType: 'String',
+          displayFormat: 2,
+          displayDigits: 2,
           fieldDec: 'test',
           explain: ''
         }, {
           id: (Date.now() + 3).toString(),
           originField: 'OrderID',
           newField: '订单ID',
-          fieldType: 'boolean',
-          showType: true,
+          fieldType: 'UInt8',
+          displayFormat: true,
+          displayDigits: 2,
           fieldDec: 'test',
           explain: ''
         }, {
           id: (Date.now() + 4).toString(),
           originField: 'OrderID',
           newField: '订单ID',
-          fieldType: 'time',
-          showType: 'YYYY-MM',
+          fieldType: 'Datetime',
+          displayFormat: 'YYYY-MM',
+          displayDigits: 2,
           fieldDec: 'test',
           explain: ''
         }
@@ -97,14 +105,15 @@ const FieldConfig: React.FC = () => {
     getTableData()
   }, [getTableData])
 
-  const getShowType = (val:any, rowID: string) => {
+  const getDisplayValue = (val:any, rowID: string) => {
     console.log(val, 'val', rowID, 'rowID')
     // TODO: 获取弹框数据后，修改表格内数据
     const newData = tableData?.map((row:DataSourceType) => {
       if (row.id === rowID) {
         return {
           ...row,
-          showType: val.scale
+          displayFormat: val.scale,
+          displayDigits: val.decimal
         }
       } else {
         return row
@@ -132,52 +141,51 @@ const FieldConfig: React.FC = () => {
       icon: null,
       footer: null,
       content: <FormatDialog
-        defaultSelect={row.showType}
+        defaultFormat={row.displayFormat}
+        defaultDigits={row.displayDigits}
+        rowID={row.id}
         destroy={() => destroy()}
-        getShowType={(val: any, rowID: string) => getShowType(val, rowID)}
-        row={row}
+        getDisplayValue={(val: any, rowID: string) => getDisplayValue(val, rowID)}
       />
     })
   }
 
   function EditableCell(cellType: CellType, value: string|number, row?:any) {
-    const timeOptions = [
-      { value: 'YYYY',
-        label: 'YYYY' },
-      { value: 'YYYY-MM',
-        label: 'YYYY-MM' },
-      { value: 'YYYY-MM-DD',
-        label: 'YYYY-MM-DD' }
-    ]
+    const timeOptions = ['YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'YYYY年MM月DD日', 'YYYY-MM-DD HH-mm-ss', 'YYYY年MM月DD日 HH时mm分ss秒'].map(item => {
+      return {
+        value: item,
+        label: item
+      }
+    })
     switch (cellType) {
-      case 'number':
+      case 'Float32':
         return <Select disabled onClick={() => handelFormat(row)}/>
-      case 'string':
+      case 'String':
         return <CustomInputNumber height={32} />
-      case 'time':
+      case 'Datetime':
         return <Select options={timeOptions} />
-      case 'boolean':
+      case 'UInt8':
         return <div>{value}</div>
       default:
-        throw Error('wrong type')
+        return <div>{value}</div>
     }
   }
 
   const fieldOptions = [
     {
-      value: 'number',
+      value: 'Float32',
       label: '数值'
     },
     {
-      value: 'string',
+      value: 'String',
       label: '字符串'
     },
     {
-      value: 'boolean',
+      value: 'UInt8',
       label: '布尔值'
     },
     {
-      value: 'time',
+      value: 'Datetime',
       label: '时间'
     }
   ]
@@ -192,7 +200,13 @@ const FieldConfig: React.FC = () => {
       title: '新字段名',
       dataIndex: 'newField',
       width: '15%',
-      readonly: !editStatus
+      readonly: !editStatus,
+      formItemProps: {
+        rules: [{
+          required: true,
+          message: '此项为必填项'
+        }]
+      }
     },
     {
       title: '字段类型',
@@ -204,13 +218,13 @@ const FieldConfig: React.FC = () => {
     },
     {
       title: '显示格式',
-      dataIndex: 'showType',
+      dataIndex: 'displayFormat',
       width: '15%',
       renderFormItem: (_, { record }) => {
         // console.log(record,'record')
         return !editStatus ?
-          <div>{record?.showType}</div>
-          : EditableCell(record?.fieldType as CellType, record?.showType as string | number, record)
+          <div>{record?.displayFormat}</div>
+          : EditableCell(record?.fieldType as CellType, record?.displayFormat as string | number, record)
       }
     },
     {
