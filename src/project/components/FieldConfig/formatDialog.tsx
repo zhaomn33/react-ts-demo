@@ -35,7 +35,6 @@ const FormatDialog: React.FC<Props> = (props) => {
     }
   ]
   const onFinish = (values: any, rowID: string) => {
-    console.log('Received values of form: ', values)
     props.getDisplayValue(values, rowID)
     props.destroy()
   }

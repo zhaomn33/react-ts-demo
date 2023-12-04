@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Button, Select, Form, Modal, Divider } from 'antd'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Button, Select, Modal, Divider, Form } from 'antd'
 import { CloseOutlined, EditOutlined } from '@ant-design/icons'
 import { createStyles, cx } from 'antd-style'
 import { EditableProTable } from '@ant-design/pro-components'
-import type { ProColumns } from '@ant-design/pro-components'
+import type { EditableFormInstance, ProColumns } from '@ant-design/pro-components'
 import CustomInputNumber from './custom-input-number'
 import FormatDialog from './formatDialog'
 
@@ -16,6 +16,10 @@ const useStyle = createStyles(({ css }) => ({
       &:hover{
         border-color: #4096ff;
       }
+      input{
+        cursor: pointer;
+        display: none;
+      }
     }
     .ant-input-suffix{
       display: none;
@@ -24,6 +28,9 @@ const useStyle = createStyles(({ css }) => ({
       width: 100%;
     }
     .ant-form-item-margin-offset{
+      display: none;
+    }
+    .ant-select-clear{
       display: none;
     }
   `,
@@ -40,8 +47,10 @@ type DataSourceType = {
   originField: string
   newField: string
   fieldType: string
-  displayFormat: any
-  displayDigits: number
+  displayValue: {
+    displayFormat: any
+    displayDigits: number
+  }
   fieldDec: string
   explain: string
 }
@@ -50,80 +59,113 @@ type CellType = 'Float32' | 'String' | 'UInt8' | 'Datetime'
 
 const FieldConfig: React.FC = () => {
   const { styles } = useStyle()
+  const [form] = Form.useForm()
+  const editableFormRef = useRef<EditableFormInstance>()
+  const [showloading, setShowloading] = useState(false)
   const [tableData, setTableData] = useState<Array<DataSourceType>>()
   const [editStatus, setEditStatus] = useState<any>(true)
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>()
   const [modal, contextHolder] = Modal.useModal()
 
   const getTableData = useCallback(() => {
-    setTimeout(() => {
-      const defaultData:DataSourceType[] = [
-        {
-          id: (Date.now() + 1).toString(),
-          originField: 'OrderID',
-          newField: '订单ID',
-          fieldType: 'Float32',
-          displayFormat: '百万数',
-          displayDigits: 2,
-          fieldDec: 'test',
-          explain: ''
-        }, {
-          id: (Date.now() + 2).toString(),
-          originField: 'OrderID',
-          newField: '订单ID',
-          fieldType: 'String',
-          displayFormat: 2,
-          displayDigits: 2,
-          fieldDec: 'test',
-          explain: ''
-        }, {
-          id: (Date.now() + 3).toString(),
-          originField: 'OrderID',
-          newField: '订单ID',
-          fieldType: 'UInt8',
-          displayFormat: true,
-          displayDigits: 2,
-          fieldDec: 'test',
-          explain: ''
-        }, {
-          id: (Date.now() + 4).toString(),
-          originField: 'OrderID',
-          newField: '订单ID',
-          fieldType: 'Datetime',
-          displayFormat: 'YYYY-MM',
-          displayDigits: 2,
-          fieldDec: 'test',
-          explain: ''
-        }
-      ]
-      setTableData(defaultData)
-      setEditableRowKeys(() => defaultData.map(item => item.id))
-    },200)
-  },[])
+    setShowloading(true)
+    // setTimeout(() => {
+    const defaultData: DataSourceType[] = [
+      {
+        id: (Date.now() + 1).toString(),
+        originField: 'OrderID1',
+        newField: '订单ID1',
+        fieldType: 'Float32',
+        displayValue: {
+          displayFormat: '万',
+          displayDigits: -1
+        },
+        fieldDec: 'test',
+        explain: ''
+      }, {
+        id: (Date.now() + 2).toString(),
+        originField: 'OrderID2',
+        newField: '订单ID2',
+        fieldType: 'String',
+        displayValue: {
+          displayFormat: null,
+          displayDigits: 2
+        },
+        fieldDec: 'test',
+        explain: ''
+      }, {
+        id: (Date.now() + 3).toString(),
+        originField: 'OrderID3',
+        newField: '订单ID3',
+        fieldType: 'UInt8',
+        displayValue: {
+          displayFormat: null,
+          displayDigits: -1
+        },
+        fieldDec: 'test',
+        explain: ''
+      }, {
+        id: (Date.now() + 4).toString(),
+        originField: 'OrderID4',
+        newField: '订单ID4',
+        fieldType: 'Datetime',
+        displayValue: {
+          displayFormat: 'YYYY',
+          displayDigits: -1
+        },
+        fieldDec: 'test',
+        explain: ''
+      }
+    ]
+    // editStatus === false && editableFormRef.current?.setRowData?.(index, {
+    //   newField: item.new_name,
+    //   fieldType: item.data_type,
+    //   displayValue: {
+    //     displayFormat: item.display_format,
+    //     displayDigits: item.display_digits
+    //   },
+    //   fieldDec: item.description
+    // })
+    setTableData(defaultData)
+    setEditableRowKeys(() => defaultData.map(item => item.id))
+    setShowloading(false)
+    // }, 200)
+  }, [])
 
   useEffect(() => {
     getTableData()
   }, [getTableData])
 
-  const getDisplayValue = (val:any, rowID: string) => {
-    console.log(val, 'val', rowID, 'rowID')
-    // TODO: 获取弹框数据后，修改表格内数据
-    const newData = tableData?.map((row:DataSourceType) => {
-      if (row.id === rowID) {
-        return {
-          ...row,
-          displayFormat: val.scale,
-          displayDigits: val.decimal
-        }
-      } else {
-        return row
+  // 显示格式数据
+  const getDisplayValue = (val: any, rowID: string) => {
+    console.log(val, '00val00')
+    editableFormRef.current?.setRowData?.(rowID, {
+      displayValue: {
+        displayDigits: val.decimal,
+        displayFormat: val.scale
       }
     })
-    console.log(newData,'newData-')
-    setTableData(newData)
+
+    // TODO: 获取弹框数据后，修改表格内数据
+    // const newData = tableData?.map((row: DataSourceType) => {
+    //   if (row.id === rowID) {
+    //     return {
+    //       ...row,
+    //       displayValue: {
+    //         displayFormat: val.scale,
+    //         displayDigits: val.decimal
+    //       }
+    //     }
+    //   } else {
+    //     return row
+    //   }
+    // })
+    // // console.log(newData,'newData')
+    // setTableData(newData)
   }
-  const handelFormat = (row:any) => {
-    console.log(row, 'row')
+  // 数值-显示格式弹框
+  const handelFormat = (row: any) => {
+    // console.log(row, 'row')
     const { destroy } = modal.confirm({
       className: styles['custom-add-member-modal-style'],
       title: (
@@ -141,8 +183,8 @@ const FieldConfig: React.FC = () => {
       icon: null,
       footer: null,
       content: <FormatDialog
-        defaultFormat={row.displayFormat}
-        defaultDigits={row.displayDigits}
+        defaultFormat={row.displayValue.displayFormat}
+        defaultDigits={row.displayValue.displayDigits}
         rowID={row.id}
         destroy={() => destroy()}
         getDisplayValue={(val: any, rowID: string) => getDisplayValue(val, rowID)}
@@ -150,24 +192,65 @@ const FieldConfig: React.FC = () => {
     })
   }
 
-  function EditableCell(cellType: CellType, value: string|number, row?:any) {
+  interface Value {
+    displayFormat: any
+    displayDigits: number
+  }
+  function EditableCell({ value, type, row, onChange }: {
+    value: Value
+    type: CellType
+    row?: any
+    onChange?: (value:Value) => void
+  }) {
     const timeOptions = ['YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'YYYY年MM月DD日', 'YYYY-MM-DD HH-mm-ss', 'YYYY年MM月DD日 HH时mm分ss秒'].map(item => {
       return {
         value: item,
         label: item
       }
     })
-    switch (cellType) {
+    switch (type) {
       case 'Float32':
-        return <Select disabled onClick={() => handelFormat(row)}/>
+        return <Select
+          disabled
+          onClick={() => handelFormat(row)}
+          value={value.displayFormat}
+        />
       case 'String':
-        return <CustomInputNumber height={32} />
+        return <CustomInputNumber
+          height={32}
+          value={value.displayDigits}
+          onChange={(val) => {
+            console.log(val,'String-val')
+            // onChange!({
+            //   ...value,
+            //   displayDigits: val as number
+            // })
+            editableFormRef.current?.setRowData?.(row.id, {
+              displayValue: {
+                displayDigits: val,
+                displayFormat: null
+              }
+            })
+          }}
+        />
       case 'Datetime':
-        return <Select options={timeOptions} />
+        return <Select
+          options={timeOptions}
+          value={value.displayFormat}
+          defaultValue={timeOptions[0]}
+          onChange={(val) => {
+            editableFormRef.current?.setRowData?.(row.id, {
+              displayValue: {
+                displayDigits: -1,
+                displayFormat: val
+              }
+            })
+          }}
+        />
       case 'UInt8':
-        return <div>{value}</div>
+        return <div>{value.displayFormat}</div>
       default:
-        return <div>{value}</div>
+        return <div>{value.displayFormat}</div>
     }
   }
 
@@ -214,17 +297,37 @@ const FieldConfig: React.FC = () => {
       width: '15%',
       valueType: 'select',
       request: async() => fieldOptions,
+      fieldProps: (_, { rowIndex }) => {
+        return {
+          onSelect: () => {
+            console.log('重置',rowIndex, editableFormRef.current)
+            // 每次选中重置参数
+            editableFormRef.current?.setRowData?.(rowIndex, {
+              displayValue: {
+                displayDigits: -1,
+                displayFormat: null
+              }
+            })
+          }
+        }
+      },
       readonly: !editStatus
     },
     {
       title: '显示格式',
-      dataIndex: 'displayFormat',
+      dataIndex: 'displayValue',
       width: '15%',
       renderFormItem: (_, { record }) => {
-        // console.log(record,'record')
-        return !editStatus ?
-          <div>{record?.displayFormat}</div>
-          : EditableCell(record?.fieldType as CellType, record?.displayFormat as string | number, record)
+        // console.log(record, 'record-renderFormItem') // 此处数值是对的
+        const curData = record?.fieldType === 'String' ? record?.displayValue.displayDigits : record?.displayValue.displayFormat
+        return !editStatus ? <div>{curData}</div>
+          : <EditableCell
+            type={record?.fieldType as CellType}
+            value={{
+              displayFormat: record?.displayValue.displayFormat,
+              displayDigits: record?.displayValue.displayDigits as number
+            }}
+            row={record} />
       }
     },
     {
@@ -247,7 +350,8 @@ const FieldConfig: React.FC = () => {
           key="save"
           className="h-[36px]"
           onClick={() => {
-            console.log(tableData, 'tabledata')
+            // console.log(tableData, 'tabledata')
+            console.log(editableFormRef.current?.getRowsData?.(), 'all--')
             // TODO: 走保存数据的接口
             setEditStatus(false)
           }}
@@ -258,7 +362,10 @@ const FieldConfig: React.FC = () => {
           type="default"
           className='h-[36px] ml-[16px]'
           onClick={async() => {
+            // 如果不重新获取数据，在‘编辑-修改-保存-编辑-不修改-取消’ 表格数据会变成保存前的数据
             await getTableData()
+            // 重置表格数据
+            form.resetFields()
             setEditStatus(false)
           }}
         >
@@ -286,18 +393,23 @@ const FieldConfig: React.FC = () => {
         scroll={{ x: 960 }}
         // 关闭默认的新建按钮
         recordCreatorProps={false}
+        loading={showloading}
+        editableFormRef={editableFormRef}
         toolBarRender={showBtn}
         columns={columns}
         value={tableData}
         controlled
+        // onChange={setTableData}
         editable={{
+          form,
           type: 'multiple',
           editableKeys,
-          onChange: setEditableRowKeys,
-          onValuesChange: (record, recordList) => {
-            console.log(recordList,'recordList')
-            setTableData(recordList)
-          }
+          onChange: setEditableRowKeys
+          // onValuesChange: (record, recordList) => {
+          //   // console.log(recordList,'recordList')
+          //   console.log(record, 'record')
+          //   // setTableData(recordList)
+          // }
         }}
       />
       {contextHolder}
