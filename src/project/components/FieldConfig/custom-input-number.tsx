@@ -1,13 +1,13 @@
 import { ConfigProvider, InputNumber } from 'antd'
 import { createStyles } from 'antd-style'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import cx from 'classnames'
 
 interface custIptType {
   label?: string
   precision?: number
   height?: number
-  minValue?: number
+  minvalue?: number
   value?: number | null
   onChange?: (value: number | null) => void
 }
@@ -40,7 +40,7 @@ const useStyle = createStyles({
  *  label: 描述
  *  precision: 控制小数位数
  *  height: 高度
- *  minValue：最小值
+ *  minvalue：最小值默认0
  *  value: 提供受控属性 value 或其它与 valuePropName 的值同名的属性
  *  onChange: 提供 onChange 事件或 trigger 的值同名的事件。
  * @returns
@@ -49,26 +49,33 @@ const CustomInputNumber: React.FC<custIptType> = props => {
   const { styles } = useStyle()
   const [disabledStyle, setDisabledStyle] = useState(false)
   const curHeight = ((props.height ? props.height : 36) - 2) + 'px'
+  const newMinValue = props.minvalue || 0
   // 阈值大小change事件
   const handleReduceNum = (type = 'reduce') => {
     const currentValue = props.value || 0
     const newValue = type === 'add' ? currentValue + 1 : currentValue - 1
     if (
-      (props.minValue !== undefined && newValue >= props.minValue) ||
-      (props.minValue === undefined && newValue >= 0)
+      (props.minvalue !== undefined && newValue >= props.minvalue) ||
+      (props.minvalue === undefined && newValue >= 0)
     ) {
       props.onChange && props.onChange(newValue)
-      if (newValue > 0) {
+      if (newValue > newMinValue) {
         setDisabledStyle(false)
       }
     }
     if (
-      (props.minValue !== undefined && newValue <= props.minValue) ||
-      (props.minValue === undefined && newValue <= 0)
+      (props.minvalue !== undefined && newValue <= props.minvalue) ||
+      (props.minvalue === undefined && newValue <= 0)
     ) {
       setDisabledStyle(true)
     }
   }
+
+  useEffect(() => {
+    if (props.value! <= newMinValue) {
+      setDisabledStyle(true)
+    }
+  }, [newMinValue, props.value])
 
   return (
     <>
@@ -84,7 +91,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
         >
           {/* precision: 0 不保留小数 */}
           <InputNumber
-            min={props.minValue || 0}
+            min={props.minvalue || 0}
             {...props}
             controls={false}
             precision={props.precision || 0}

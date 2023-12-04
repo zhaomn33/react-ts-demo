@@ -89,7 +89,7 @@ const FieldConfig: React.FC = () => {
         fieldType: 'String',
         displayValue: {
           displayFormat: null,
-          displayDigits: 2
+          displayDigits: -1
         },
         fieldDec: 'test',
         explain: ''
@@ -219,6 +219,7 @@ const FieldConfig: React.FC = () => {
         return <CustomInputNumber
           height={32}
           value={value.displayDigits}
+          minvalue={-1}
           onChange={(val) => {
             console.log(val,'String-val')
             // onChange!({
