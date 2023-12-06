@@ -11,6 +11,7 @@ interface custIptType {
   minvalue?: number
   value?: number | null
   placeholder?: string
+  status?: 'error' | 'warning' | ''
   onChange?: (value: number | null) => void
 }
 
@@ -99,6 +100,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
             controls={false}
             precision={props.precision || 0}
             placeholder={ props.placeholder || '请输入' }
+            status={ props.status || '' }
             className={cx({
               [styles['custom-iptnumber-box']]: true,
               [styles['custom-iptnumber-container']]: disabledStyle

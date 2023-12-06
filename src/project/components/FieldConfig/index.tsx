@@ -216,30 +216,39 @@ const FieldConfig: React.FC = () => {
           value={value.displayFormat}
         />
       case 'String':
-        return <CustomInputNumber
-          height={32}
-          value={value.displayDigits}
-          minvalue={-1}
-          placeholder='字符数'
-          onChange={(val) => {
-            console.log(val,'String-val')
-            // onChange!({
-            //   ...value,
-            //   displayDigits: val as number
-            // })
-            editableFormRef.current?.setRowData?.(row.id, {
-              displayValue: {
-                displayDigits: val,
-                displayFormat: null
-              }
-            })
-          }}
-        />
+        return (
+          <>
+            <CustomInputNumber
+              height={32}
+              value={value.displayDigits}
+              minvalue={-1}
+              placeholder='字符数'
+              status={(value.displayDigits || value.displayDigits === 0) ? '' : 'error'}
+              onChange={(val) => {
+                console.log(val,'String-val')
+                // onChange!({
+                //   ...value,
+                //   displayDigits: val as number
+                // })
+                editableFormRef.current?.setRowData?.(row.id, {
+                  displayValue: {
+                    displayDigits: val,
+                    displayFormat: null
+                  }
+                })
+              }}
+            />
+            <div className={!value.displayDigits ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
+              {'字符数必填'}
+            </div>
+          </>
+        )
       case 'Datetime':
         return <Select
           options={timeOptions}
           value={value.displayFormat}
           defaultValue={timeOptions[0]}
+          allowClear
           onChange={(val) => {
             editableFormRef.current?.setRowData?.(row.id, {
               displayValue: {
@@ -288,8 +297,7 @@ const FieldConfig: React.FC = () => {
       readonly: !editStatus,
       formItemProps: {
         rules: [{
-          required: true,
-          message: '此项为必填项'
+          required: true
         }]
       }
     },
@@ -298,6 +306,11 @@ const FieldConfig: React.FC = () => {
       dataIndex: 'fieldType',
       width: '15%',
       valueType: 'select',
+      formItemProps: {
+        rules: [{
+          required: true
+        }]
+      },
       request: async() => fieldOptions,
       fieldProps: (_, { rowIndex }) => {
         return {

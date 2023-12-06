@@ -41,7 +41,7 @@ const FormatDialog: React.FC<Props> = (props) => {
   return (
     <div className='px-[24px] py-[16px]'>
       <Form
-        labelCol={{ span: 5 }}
+        labelCol={{ span: 6 }}
         className={styles['custom-form-style']}
         initialValues={{
           scale: props.defaultFormat,
@@ -50,9 +50,10 @@ const FormatDialog: React.FC<Props> = (props) => {
         onFinish={(val:any) => onFinish(val, props.rowID)}
       >
         <Form.Item label="比例" name="scale">
-          <Select options={scaleOptions} />
+          <Select options={scaleOptions} allowClear />
         </Form.Item>
-        <Form.Item label="小数位数" name="decimal">
+        <Form.Item label="小数位数" name="decimal" rules={[{ required: true,
+          message: '小数位数必填' }]}>
           <CustomInputNumber height={32} minvalue={-1} placeholder='小数位数' />
         </Form.Item>
         <Form.Item className='float-right'>
