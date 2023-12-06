@@ -220,6 +220,7 @@ const FieldConfig: React.FC = () => {
           height={32}
           value={value.displayDigits}
           minvalue={-1}
+          placeholder='字符数'
           onChange={(val) => {
             console.log(val,'String-val')
             // onChange!({

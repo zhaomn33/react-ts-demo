@@ -2,6 +2,7 @@ import { ConfigProvider, InputNumber } from 'antd'
 import { createStyles } from 'antd-style'
 import React, { useEffect, useState } from 'react'
 import cx from 'classnames'
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons'
 
 interface custIptType {
   label?: string
@@ -9,6 +10,7 @@ interface custIptType {
   height?: number
   minvalue?: number
   value?: number | null
+  placeholder?: string
   onChange?: (value: number | null) => void
 }
 
@@ -27,7 +29,8 @@ const useStyle = createStyles({
     }
   },
   'custom-disabled-pre': {
-    cursor: 'no-drop!important'
+    cursor: 'no-drop!important',
+    backgroundColor: 'rgba(0, 0, 0, 0.01)'
   },
   'label-margin-left': {
     marginLeft: '8px'
@@ -95,7 +98,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
             {...props}
             controls={false}
             precision={props.precision || 0}
-            placeholder="请输入"
+            placeholder={ props.placeholder || '请输入' }
             className={cx({
               [styles['custom-iptnumber-box']]: true,
               [styles['custom-iptnumber-container']]: disabledStyle
@@ -104,7 +107,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
               <div
                 className={cx(
                   { [styles['custom-disabled-pre']]: disabledStyle },
-                  'w-[28px] cursor-pointer select-none'
+                  'w-[30px] cursor-pointer bg-white rounded-[6px_0_0_6px]'
                 )}
                 onClick={() => handleReduceNum()}
                 style={{
@@ -112,19 +115,19 @@ const CustomInputNumber: React.FC<custIptType> = props => {
                   lineHeight: curHeight
                 }}
               >
-                -
+                <MinusOutlined className='text-[#606266]'/>
               </div>
             }
             addonAfter={
               <div
-                className="w-[28px] cursor-pointer select-none"
+                className="w-[30px] cursor-pointer bg-white rounded-[0_6px_6px_0]"
                 style={{
                   height: curHeight,
                   lineHeight: curHeight
                 }}
                 onClick={() => handleReduceNum('add')}
               >
-                +
+                <PlusOutlined className='text-[#606266]'/>
               </div>
             }
           />

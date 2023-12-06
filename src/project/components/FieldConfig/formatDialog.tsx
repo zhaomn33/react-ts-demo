@@ -53,7 +53,7 @@ const FormatDialog: React.FC<Props> = (props) => {
           <Select options={scaleOptions} />
         </Form.Item>
         <Form.Item label="小数位数" name="decimal">
-          <CustomInputNumber height={32} />
+          <CustomInputNumber height={32} minvalue={-1} placeholder='小数位数' />
         </Form.Item>
         <Form.Item className='float-right'>
           <Button type="primary" htmlType="submit">
