@@ -40,7 +40,6 @@ const useStyle = createStyles(({ css }) => ({
       .ant-image {
         overflow: hidden;
         margin-bottom: 16px;
-        border: 1px dashed #aaa;
       },
       .ant-upload-btn {
         .ant-upload-drag-container {
@@ -248,7 +247,7 @@ const DemoPage: React.FC = (props) => {
       <div className="w-[800px] h-[68px] px-[16px] flex justify-between items-center">
         <img
           src={file.name.includes('.csv') ? icon_csv : icon_excel}
-          className="w-[44px] h-[44px] border-[1px] border-dashed border-[#aaa]"
+          className="w-[44px] h-[44px]"
         />
         <div className="w-[fill-available] mx-[13px]">
           <div className="flex justify-between">

@@ -49,7 +49,7 @@ const route:{ [key:string] :any; } = {
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('editTable')
+  const [current, setCurrent] = useState('upload')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
