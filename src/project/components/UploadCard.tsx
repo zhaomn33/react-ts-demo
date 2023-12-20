@@ -14,6 +14,7 @@ import SparkMD5 from 'spark-md5'
 import axios from 'axios'
 import type { UploadRequestOption } from 'rc-upload/lib/interface'
 // import { useRouter } from '../helper/helper-router.ts'
+import { io } from 'socket.io-client'
 
 const { Dragger } = Upload
 const useStyle = createStyles(({ css }) => ({
@@ -58,6 +59,14 @@ const useStyle = createStyles(({ css }) => ({
     }
   }`
 }))
+
+const socketUrl = 'http://10.30.0.16/ecom'
+const socket = io(socketUrl, {
+  transports: ['websocket'],
+  reconnectionDelayMax: 2000,
+  reconnectionAttempts: 3,
+  autoConnect: false
+})
 
 const DemoPage: React.FC = (props) => {
   const { styles } = useStyle()
@@ -158,6 +167,38 @@ const DemoPage: React.FC = (props) => {
   //   };
   // }, []);
 
+  useEffect(() => {
+    // socket.open() // 连接 websocket
+    // 处理从服务器接收的消息
+    const socketFun = (...args: any) => {
+      // 获取到信息并处理
+      console.log(args[0].data, 'args')
+      console.log(isFilelist, 'isFilelist')
+      // setIsFilelist((filelist) => {
+      if (args[0].data?.length && isFilelist.length) {
+        const newFileList = isFilelist?.map((item: any) => {
+          console.log(item, 'item')
+          const newItem = args[0].data.find((newItem: any) => {
+            console.log(newItem.file_id,'newItem---',item.file_id ?? file_uid_taskId.current[item.uid as string])
+            return newItem.file_id === (item.file_id ?? file_uid_taskId.current[item.uid as string])
+          })
+          console.log(newItem,'newItem')
+          if (newItem) {
+            return {
+              ...item,
+              verification_status: item.verification_status
+            }
+          }
+        })
+        console.log(newFileList, 'newFileList')
+        return newFileList
+      }
+      // })
+    }
+    socket.on('upload', socketFun)
+
+  }, [isFilelist])
+
   // 初始化
   useEffect(() => {
     console.log('init')
@@ -168,7 +209,8 @@ const DemoPage: React.FC = (props) => {
           file_id: 'xxx111',
           file_name: 'xxxxxx',
           finish_slices: [0, 1, 2],
-          slice_cnt: 3
+          slice_cnt: 3,
+          verification_status: 2
         }]
       }
       const error = 0
@@ -183,6 +225,11 @@ const DemoPage: React.FC = (props) => {
       }
     }
     initFileList()
+    return () => {
+      // 在组件卸载时断开 WebSocket 连接
+      socket.disconnect()
+      // socket.off('upload', socketFun)
+    }
   }, [])
 
   interface DraggableUploadListItemFunProps {
@@ -365,13 +412,23 @@ const DemoPage: React.FC = (props) => {
         const error = 0
         if (!error) {
           messageApi.success(`${ info.file.name }文件上传成功`)
+
+          socket.open() // 连接 websocket
+          socket.emit(
+            'join',
+            {
+              'project_id': '6577be3a9a33244f62741721',
+              'token': '02bb5056-9025-11ee-aa5d-02420c0b0406',
+              'event_type': 'upload'
+            }
+          )
         } else {
           messageApi.error(`${ info.file.name }文件合并失败`)
         }
       }
     },
     beforeUpload: async(file, fileList) => {
-      console.log('🔥 上传之前', file, fileList)
+      // console.log('🔥 上传之前', file, fileList)
       // 文件大小超过2GB，请联系管理员后台上传
       // if (file.size! > maxFileSize) {
       //   !ignoredFiles.current.includes(file.uid) && ignoredFiles.current.push(file.uid)
@@ -404,7 +461,7 @@ const DemoPage: React.FC = (props) => {
 
       // 文件切片
       file_uid_chunk.current[file.uid] = fileSlice(file)
-      console.log('切片完成chunks 🎁', file_uid_chunk.current[file.uid], '✅')
+      // console.log('切片完成chunks 🎁', file_uid_chunk.current[file.uid], '✅')
 
       // TODO: 需要获取切片ID
       const requestData = {
@@ -415,7 +472,7 @@ const DemoPage: React.FC = (props) => {
       }
       const error = 0
       const data = {
-        file_id: 'xxx'
+        file_id: '65795ef48d7a4d6eda2de68c'
       }
       if (!error) {
         file_uid_taskId.current[file.uid] = data.file_id as string
@@ -430,7 +487,7 @@ const DemoPage: React.FC = (props) => {
       }
     },
     customRequest: async(info: UploadRequestOption) => {
-      console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀  开始上传', info)
+      // console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀  开始上传', info)
       const upFile = info.file as RcFile
       const controller = new AbortController()
       // 删除已在上传列表的文件uid

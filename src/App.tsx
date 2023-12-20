@@ -11,6 +11,7 @@ import UploadCard from './project/components/UploadCard'
 import CreateModal from './project/components/CreateModal'
 import SideAreaLayout from './project/components/SideAreaLayout'
 import FieldConfig from './project/components/FieldConfig'
+import SocketPage from './project/components/SocketPage'
 
 const { Content, Sider } = Layout
 
@@ -37,7 +38,8 @@ const items: MenuItem[] = [
   getItem('表格', 'table', <AppstoreOutlined />),
   getItem('弹框', 'modal', <DesktopOutlined />),
   getItem('侧边栏Layout', 'layout', <AppstoreOutlined />),
-  getItem('可编辑表格', 'editTable', <MailOutlined />)
+  getItem('可编辑表格', 'editTable', <MailOutlined />),
+  getItem('socket', 'socket', <DesktopOutlined />)
 ]
 
 const route:{ [key:string] :any; } = {
@@ -45,11 +47,12 @@ const route:{ [key:string] :any; } = {
   'table': <ProjectListPage />,
   'modal': <CreateModal />,
   'layout': <SideAreaLayout />,
-  'editTable': <FieldConfig />
+  'editTable': <FieldConfig />,
+  'socket': <SocketPage />
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('upload')
+  const [current, setCurrent] = useState('editTable')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
