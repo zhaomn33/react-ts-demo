@@ -109,7 +109,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
               <div
                 className={cx(
                   { [styles['custom-disabled-pre']]: disabledStyle },
-                  'w-[30px] cursor-pointer bg-white rounded-[6px_0_0_6px]'
+                  'w-[30px] cursor-pointer bg-white rounded-[6px_0_0_6px] select-none'
                 )}
                 onClick={() => handleReduceNum()}
                 style={{
@@ -122,7 +122,7 @@ const CustomInputNumber: React.FC<custIptType> = props => {
             }
             addonAfter={
               <div
-                className="w-[30px] cursor-pointer bg-white rounded-[0_6px_6px_0]"
+                className="w-[30px] cursor-pointer bg-white rounded-[0_6px_6px_0] select-none"
                 style={{
                   height: curHeight,
                   lineHeight: curHeight

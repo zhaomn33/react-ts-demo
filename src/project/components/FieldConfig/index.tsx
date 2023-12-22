@@ -238,7 +238,7 @@ const FieldConfig: React.FC = () => {
                 })
               }}
             />
-            <div className={!value.displayDigits ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
+            <div className={!(value.displayDigits || value.displayDigits === 0) ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
               {'字符数必填'}
             </div>
           </>

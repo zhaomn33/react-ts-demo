@@ -57,6 +57,24 @@ type DataSourceType = {
 interface EditTableProps extends TableProps<DataSourceType> {
   readonly?: boolean
 }
+const fieldOptions = [
+  {
+    value: 'Float32',
+    label: '数值'
+  },
+  {
+    value: 'String',
+    label: '字符串'
+  },
+  {
+    value: 'UInt8',
+    label: '布尔值'
+  },
+  {
+    value: 'Datetime',
+    label: '时间'
+  }
+]
 
 // 数值-显示格式弹框
 const handelFormat = (row: any) => {
@@ -139,12 +157,7 @@ const VirtualTable: React.FC = () => {
               record.fieldType = val
             }}
             disabled={!editStatus}
-            options={[
-              { value: 'Float32',
-                label: 'Float32' },
-              { value: 'String',
-                label: 'String' }
-            ]}
+            options={fieldOptions}
           ></Select>
       }
     },
@@ -234,7 +247,7 @@ const VirtualTable: React.FC = () => {
                 // })
               }}
             />
-            <div className={!value.displayDigits ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
+            <div className={(value.displayDigits || value.displayDigits === 0) ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
               {'字符数必填'}
             </div>
           </>

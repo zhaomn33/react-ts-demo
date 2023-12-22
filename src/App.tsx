@@ -3,7 +3,11 @@ import { Layout, Menu } from 'antd'
 import {
   AppstoreOutlined,
   DesktopOutlined,
-  MailOutlined
+  MailOutlined,
+  ContainerOutlined,
+  FileTextOutlined,
+  LayoutOutlined,
+  ReconciliationOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import ProjectListPage from './project'
@@ -39,11 +43,11 @@ const items: MenuItem[] = [
   getItem('文件上传', 'upload', <MailOutlined />),
   getItem('表格', 'table', <AppstoreOutlined />),
   getItem('弹框', 'modal', <DesktopOutlined />),
-  getItem('侧边栏Layout', 'layout', <AppstoreOutlined />),
-  getItem('可编辑表格', 'editTable', <MailOutlined />),
-  getItem('单行编辑表格', 'rowEditTable', <DesktopOutlined />),
-  getItem('虚拟编辑表格', 'virtualTable', <AppstoreOutlined />),
-  getItem('socket', 'socket', <DesktopOutlined />)
+  getItem('侧边栏Layout', 'layout', <LayoutOutlined />),
+  getItem('可编辑表格', 'editTable', <FileTextOutlined />),
+  getItem('单行编辑表格', 'rowEditTable', <ContainerOutlined />),
+  getItem('虚拟编辑表格', 'virtualTable', <ReconciliationOutlined />),
+  getItem('socket', 'socket', <MailOutlined />)
 ]
 
 const route:{ [key:string] :any; } = {
@@ -58,7 +62,7 @@ const route:{ [key:string] :any; } = {
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('rowEditTable')
+  const [current, setCurrent] = useState('editTable')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
