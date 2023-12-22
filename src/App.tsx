@@ -11,7 +11,9 @@ import UploadCard from './project/components/UploadCard'
 import CreateModal from './project/components/CreateModal'
 import SideAreaLayout from './project/components/SideAreaLayout'
 import FieldConfig from './project/components/FieldConfig'
+import EditableTable from './project/components/EditableTable'
 import SocketPage from './project/components/SocketPage'
+import VirtualTable from './project/components/VirtualTable'
 
 const { Content, Sider } = Layout
 
@@ -39,6 +41,8 @@ const items: MenuItem[] = [
   getItem('弹框', 'modal', <DesktopOutlined />),
   getItem('侧边栏Layout', 'layout', <AppstoreOutlined />),
   getItem('可编辑表格', 'editTable', <MailOutlined />),
+  getItem('单行编辑表格', 'rowEditTable', <DesktopOutlined />),
+  getItem('虚拟编辑表格', 'virtualTable', <AppstoreOutlined />),
   getItem('socket', 'socket', <DesktopOutlined />)
 ]
 
@@ -48,11 +52,13 @@ const route:{ [key:string] :any; } = {
   'modal': <CreateModal />,
   'layout': <SideAreaLayout />,
   'editTable': <FieldConfig />,
+  'rowEditTable': <EditableTable />,
+  'virtualTable': <VirtualTable />,
   'socket': <SocketPage />
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('editTable')
+  const [current, setCurrent] = useState('rowEditTable')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
