@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Select, Modal, Divider, Form } from 'antd'
+import { Button, Modal, Divider, Form } from 'antd'
 import { CloseOutlined, EditOutlined } from '@ant-design/icons'
 import { createStyles, cx } from 'antd-style'
 import { EditableProTable } from '@ant-design/pro-components'
 import type { EditableFormInstance, ProColumns } from '@ant-design/pro-components'
-import CustomInputNumber from './custom-input-number'
 import FormatDialog from './formatDialog'
+import EditableCell, { getDisplayCellValue, CellType } from './EditableCell'
 
 const useStyle = createStyles(({ css }) => ({
   'custom-table-style': css`
@@ -54,8 +54,24 @@ type DataSourceType = {
   fieldDec: string
   explain: string
 }
-
-type CellType = 'Float32' | 'String' | 'UInt8' | 'Datetime'
+const fieldOptions = [
+  {
+    value: 'Float32',
+    label: '数值'
+  },
+  {
+    value: 'String',
+    label: '字符串'
+  },
+  {
+    value: 'UInt8',
+    label: '布尔值'
+  },
+  {
+    value: 'Datetime',
+    label: '时间'
+  }
+]
 
 const FieldConfig: React.FC = () => {
   const { styles } = useStyle()
@@ -192,97 +208,6 @@ const FieldConfig: React.FC = () => {
     })
   }
 
-  interface Value {
-    displayFormat: any
-    displayDigits: number
-  }
-  function EditableCell({ value, type, row, onChange }: {
-    value: Value
-    type: CellType
-    row?: any
-    onChange?: (value:Value) => void
-  }) {
-    const timeOptions = ['YYYY', 'YYYY-MM', 'YYYY-MM-DD', 'YYYY年MM月DD日', 'YYYY-MM-DD HH-mm-ss', 'YYYY年MM月DD日 HH时mm分ss秒'].map(item => {
-      return {
-        value: item,
-        label: item
-      }
-    })
-    switch (type) {
-      case 'Float32':
-        return <Select
-          disabled
-          onClick={() => handelFormat(row)}
-          value={value.displayFormat}
-        />
-      case 'String':
-        return (
-          <>
-            <CustomInputNumber
-              height={32}
-              value={value.displayDigits}
-              minvalue={-1}
-              placeholder='字符数'
-              status={(value.displayDigits || value.displayDigits === 0) ? '' : 'error'}
-              onChange={(val) => {
-                console.log(val,'String-val')
-                // onChange!({
-                //   ...value,
-                //   displayDigits: val as number
-                // })
-                editableFormRef.current?.setRowData?.(row.id, {
-                  displayValue: {
-                    displayDigits: val,
-                    displayFormat: null
-                  }
-                })
-              }}
-            />
-            <div className={!(value.displayDigits || value.displayDigits === 0) ? 'block absolute left-[32px] bottom-[-22px] text-[#ff4d4f] z-10' : 'hidden'}>
-              {'字符数必填'}
-            </div>
-          </>
-        )
-      case 'Datetime':
-        return <Select
-          options={timeOptions}
-          value={value.displayFormat}
-          defaultValue={timeOptions[0]}
-          allowClear
-          onChange={(val) => {
-            editableFormRef.current?.setRowData?.(row.id, {
-              displayValue: {
-                displayDigits: -1,
-                displayFormat: val
-              }
-            })
-          }}
-        />
-      case 'UInt8':
-        return <div>{value.displayFormat}</div>
-      default:
-        return <div>{value.displayFormat}</div>
-    }
-  }
-
-  const fieldOptions = [
-    {
-      value: 'Float32',
-      label: '数值'
-    },
-    {
-      value: 'String',
-      label: '字符串'
-    },
-    {
-      value: 'UInt8',
-      label: '布尔值'
-    },
-    {
-      value: 'Datetime',
-      label: '时间'
-    }
-  ]
   const columns: ProColumns<DataSourceType>[] = [
     {
       title: '原字段名',
@@ -333,16 +258,28 @@ const FieldConfig: React.FC = () => {
       dataIndex: 'displayValue',
       width: '15%',
       renderFormItem: (_, { record }) => {
-        // console.log(record, 'record-renderFormItem') // 此处数值是对的
-        const curData = record?.fieldType === 'String' ? record?.displayValue.displayDigits : record?.displayValue.displayFormat
-        return !editStatus ? <div>{curData}</div>
+        const { displayFormat, displayDigits } = record?.displayValue || {
+          displayDigits: -1,
+          displayFormat: null
+        }
+        const curData: { [key: string]: string|number; } = {
+          'Float32': getDisplayCellValue(displayFormat, displayDigits),
+          'String': displayDigits,
+          'UInt8': displayFormat,
+          'Datetime': displayFormat,
+          undefined: displayFormat
+        }
+        return !editStatus ? <div>{curData[record?.fieldType as string]}</div>
           : <EditableCell
             type={record?.fieldType as CellType}
             value={{
               displayFormat: record?.displayValue.displayFormat,
               displayDigits: record?.displayValue.displayDigits as number
             }}
-            row={record} />
+            row={record}
+            editableFormRef={editableFormRef}
+            handelFormat={handelFormat}
+          />
       }
     },
     {

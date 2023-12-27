@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Select, Modal, Divider, Form, Input } from 'antd'
-import { CloseOutlined, EditOutlined } from '@ant-design/icons'
+import { CloseOutlined } from '@ant-design/icons'
 import { createStyles, cx } from 'antd-style'
 import { EditableProTable } from '@ant-design/pro-components'
 import type { EditableFormInstance, ProColumns } from '@ant-design/pro-components'
