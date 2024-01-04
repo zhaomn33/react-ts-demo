@@ -73,7 +73,7 @@ const fieldOptions = [
   }
 ]
 
-const FieldConfig: React.FC = () => {
+const FieldConfigProTable: React.FC = () => {
   const { styles } = useStyle()
   const [form] = Form.useForm()
   const editableFormRef = useRef<EditableFormInstance>()
@@ -369,4 +369,4 @@ const FieldConfig: React.FC = () => {
   )
 }
 
-export default FieldConfig
+export default FieldConfigProTable

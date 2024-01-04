@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Button, Input, Select, Table, TableProps } from 'antd'
-import CustomInputNumber from '../FieldConfig/custom-input-number'
+import CustomInputNumber from '../FieldConfigProTable/custom-input-number'
 import { createStyles, cx } from 'antd-style'
 import { EditOutlined } from '@ant-design/icons'
 

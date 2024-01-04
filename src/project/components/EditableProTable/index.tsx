@@ -4,8 +4,8 @@ import { CloseOutlined } from '@ant-design/icons'
 import { createStyles, cx } from 'antd-style'
 import { EditableProTable } from '@ant-design/pro-components'
 import type { EditableFormInstance, ProColumns } from '@ant-design/pro-components'
-import CustomInputNumber from '../FieldConfig/custom-input-number'
-import FormatDialog from '../FieldConfig/formatDialog'
+import CustomInputNumber from '../FieldConfigProTable/custom-input-number'
+import FormatDialog from '../FieldConfigProTable/formatDialog'
 
 const useStyle = createStyles(({ css }) => ({
   'custom-table-style': css`
@@ -86,7 +86,7 @@ const fieldValue: {
   'Datetime': '时间'
 }
 
-const EditableTable: React.FC = () => {
+const EditableProTable: React.FC = () => {
   const { styles } = useStyle()
   const [form] = Form.useForm()
   const editableFormRef = useRef<EditableFormInstance>()
@@ -547,4 +547,4 @@ const EditableTable: React.FC = () => {
   )
 }
 
-export default EditableTable
+export default EditableProTable

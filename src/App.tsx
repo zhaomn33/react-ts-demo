@@ -14,10 +14,11 @@ import ProjectListPage from './project'
 import UploadCard from './project/components/UploadCard'
 import CreateModal from './project/components/CreateModal'
 import SideAreaLayout from './project/components/SideAreaLayout'
-import FieldConfig from './project/components/FieldConfig'
-import EditableTable from './project/components/EditableTable'
+import FieldConfigProTable from './project/components/FieldConfigProTable'
+import EditableProTable from './project/components/EditableProTable'
 import SocketPage from './project/components/SocketPage'
 import VirtualTable from './project/components/VirtualTable'
+import EditTableList from './project/components/EditTableList'
 
 const { Content, Sider } = Layout
 
@@ -47,6 +48,7 @@ const items: MenuItem[] = [
   getItem('可编辑表格', 'editTable', <FileTextOutlined />),
   getItem('单行编辑表格', 'rowEditTable', <ContainerOutlined />),
   getItem('虚拟编辑表格', 'virtualTable', <ReconciliationOutlined />),
+  getItem('编辑表格列表', 'editTableList', <AppstoreOutlined />),
   getItem('socket', 'socket', <MailOutlined />)
 ]
 
@@ -55,14 +57,15 @@ const route:{ [key:string] :any; } = {
   'table': <ProjectListPage />,
   'modal': <CreateModal />,
   'layout': <SideAreaLayout />,
-  'editTable': <FieldConfig />,
-  'rowEditTable': <EditableTable />,
+  'editTable': <FieldConfigProTable />,
+  'rowEditTable': <EditableProTable />,
   'virtualTable': <VirtualTable />,
+  'editTableList': <EditTableList />,
   'socket': <SocketPage />
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('editTable')
+  const [current, setCurrent] = useState('editTableList')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
