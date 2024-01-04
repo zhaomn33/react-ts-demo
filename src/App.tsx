@@ -19,6 +19,7 @@ import RowEditProTable from './project/components/RowEditProTable'
 import SocketPage from './project/components/SocketPage'
 import VirtualTable from './project/components/VirtualTable'
 import EditTableList from './project/components/EditTableList'
+import EditableTable from './project/components/EditableTable'
 
 const { Content, Sider } = Layout
 
@@ -45,10 +46,11 @@ const items: MenuItem[] = [
   getItem('表格', 'table', <AppstoreOutlined />),
   getItem('弹框', 'modal', <DesktopOutlined />),
   getItem('侧边栏Layout', 'layout', <LayoutOutlined />),
-  getItem('可编辑表格', 'editTable', <FileTextOutlined />),
+  getItem('高级可编辑表格', 'editProTable', <FileTextOutlined />),
   getItem('单行编辑表格', 'rowEditTable', <ContainerOutlined />),
   getItem('虚拟编辑表格', 'virtualTable', <ReconciliationOutlined />),
   getItem('编辑表格列表', 'editTableList', <AppstoreOutlined />),
+  getItem('可编辑表格', 'editTable', <AppstoreOutlined />),
   getItem('socket', 'socket', <MailOutlined />)
 ]
 
@@ -57,15 +59,16 @@ const route:{ [key:string] :any; } = {
   'table': <ProjectListPage />,
   'modal': <CreateModal />,
   'layout': <SideAreaLayout />,
-  'editTable': <FieldConfigProTable />,
+  'editProTable': <FieldConfigProTable />,
   'rowEditTable': <RowEditProTable />,
   'virtualTable': <VirtualTable />,
   'editTableList': <EditTableList />,
+  'editTable': <EditableTable />,
   'socket': <SocketPage />
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('editTableList')
+  const [current, setCurrent] = useState('editTable')
   return (
     <Layout className="h-screen w-screen">
       <Sider>
