@@ -15,7 +15,7 @@ import UploadCard from './project/components/UploadCard'
 import CreateModal from './project/components/CreateModal'
 import SideAreaLayout from './project/components/SideAreaLayout'
 import FieldConfigProTable from './project/components/FieldConfigProTable'
-import EditableProTable from './project/components/EditableProTable'
+import RowEditProTable from './project/components/RowEditProTable'
 import SocketPage from './project/components/SocketPage'
 import VirtualTable from './project/components/VirtualTable'
 import EditTableList from './project/components/EditTableList'
@@ -58,7 +58,7 @@ const route:{ [key:string] :any; } = {
   'modal': <CreateModal />,
   'layout': <SideAreaLayout />,
   'editTable': <FieldConfigProTable />,
-  'rowEditTable': <EditableProTable />,
+  'rowEditTable': <RowEditProTable />,
   'virtualTable': <VirtualTable />,
   'editTableList': <EditTableList />,
   'socket': <SocketPage />

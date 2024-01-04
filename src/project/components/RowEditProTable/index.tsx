@@ -86,7 +86,7 @@ const fieldValue: {
   'Datetime': '时间'
 }
 
-const EditableProTable: React.FC = () => {
+const RowEditProTable: React.FC = () => {
   const { styles } = useStyle()
   const [form] = Form.useForm()
   const editableFormRef = useRef<EditableFormInstance>()
@@ -547,4 +547,4 @@ const EditableProTable: React.FC = () => {
   )
 }
 
-export default EditableProTable
+export default RowEditProTable
