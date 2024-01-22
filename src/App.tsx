@@ -81,7 +81,7 @@ const App: React.FC = () => {
           onClick={(e) => setCurrent(e.key)}
         />
       </Sider>
-      <Content className="bg-bg-main p-10">
+      <Content className="bg-bg-main p-10 overflow-auto">
         {route[current]}
       </Content>
       {/* <Footer style={{ textAlign: 'center' }}>

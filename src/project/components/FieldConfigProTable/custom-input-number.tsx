@@ -17,6 +17,7 @@ interface custIptType {
 
 const useStyle = createStyles({
   'custom-iptnumber-box': {
+    width: '100%',
     '.ant-input-number-group-addon': {
       padding: 0
     }

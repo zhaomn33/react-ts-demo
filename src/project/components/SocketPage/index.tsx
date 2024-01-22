@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { Button } from 'antd'
 import { io } from 'socket.io-client'
 
-const socketUrl = 'http://10.30.0.16/ecom'
+const socketUrl = 'http://172.20.111.67/ecom'
 const socket = io(socketUrl, {
   transports: ['websocket'],
   reconnectionDelayMax: 2000,
