@@ -68,7 +68,7 @@ const route:{ [key:string] :any; } = {
 }
 
 const App: React.FC = () => {
-  const [current, setCurrent] = useState('editTable')
+  const [current, setCurrent] = useState('socket')
   return (
     <Layout className="h-screen w-screen">
       <Sider>

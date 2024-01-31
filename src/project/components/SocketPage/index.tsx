@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Button } from 'antd'
 import { io } from 'socket.io-client'
 
@@ -12,30 +12,36 @@ const socket = io(socketUrl, {
 
 const SocketPage = () => {
 
+  // 处理从服务器接收的消息
+  const socketFun = useCallback((...args: any) => {
+    // 获取到信息并处理
+    console.log(args, 'args')
+  }, [])
+
   useEffect(() => {
-    // 处理从服务器接收的消息
-    const socketFun = (...args: any) => {
-      // 获取到信息并处理
-      console.log(args, 'args')
-    }
-    socket.on('upload', socketFun)
+    // socket.on('upload', socketFun)
 
     return () => {
       // 在组件卸载时断开 WebSocket 连接
       socket.disconnect()
       socket.off('upload', socketFun)
     }
-  }, [])
+  }, [socketFun])
 
+  // 控制台-网络-WS-查看socket信息
   const handleConnect = () => {
     console.log('join')
     // socket.connect() // 和 open() 效果一样
-    socket.open() // 连接 websocket
+    // 连接 websocket
+    socket.open()
+    // 处理从服务器接收的消息
+    socket.on('upload', socketFun)
+    // 加入 websocket 房间
     socket.emit(
       'join',
       {
-        'project_id': '6577be3a9a33244f62741721',
-        'token': '02bb5056-9025-11ee-aa5d-02420c0b0406',
+        'project_id': '6588f345c8456e5171b50580',
+        'token': '9a26f932-bf45-11ee-9166-02420c0b0506',
         'event_type': 'upload'
       }
     )
